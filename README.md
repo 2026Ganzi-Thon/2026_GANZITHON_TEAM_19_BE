@@ -4,7 +4,6 @@
 
 - 명세: MindCare TRD 백엔드 v0.4 (팀 디스코드 공유본)
 - 스택: Spring Boot 4.1 · Java 21 · PostgreSQL 17 · Redis · Flyway · springdoc
-- 담당: BE-1 박준형 (플랫폼 기반·인프라) / BE-2 엄태성 (상담 도메인) / AI 김준성 (별도 AI 서버)
 
 ## 로컬 실행
 
