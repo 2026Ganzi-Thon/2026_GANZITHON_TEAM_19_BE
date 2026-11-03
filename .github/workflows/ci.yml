@@ -1,0 +1,76 @@
+name: Backend CI
+
+on:
+  # main으로 들어가는 PR을 올리거나 커밋을 추가할 때
+  pull_request:
+    branches: [main]
+  # main에 머지됐을 때 (배포 job은 인프라 PR에서 추가)
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  # PR은 이전 실행 취소하고 최신만 검사, main은 순서대로
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    # 테스트용 PostgreSQL·Redis (docker-compose.yml과 같은 이미지)
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: mindcare
+          POSTGRES_USER: mindcare
+          POSTGRES_PASSWORD: mindcare
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U mindcare"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7.4
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      SPRING_PROFILES_ACTIVE: local
+      # CI 컨테이너는 기본 포트(5432·6379)라서 로컬 기본값(5433·6380) 대신 덮어씀
+      DB_URL: jdbc:postgresql://localhost:5432/mindcare
+      REDIS_URL: redis://localhost:6379
+
+    steps:
+      - name: 코드 가져오기
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: JDK 21 설치
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Gradle 설정 (의존성 캐시 포함)
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: gradlew 실행 권한
+        run: chmod +x gradlew
+
+      - name: 빌드 + 테스트
+        # 컴파일, 테스트(스프링 시작 = Flyway·JPA 검증 포함)
+        run: ./gradlew build
