@@ -1,0 +1,25 @@
+# 로컬 개발용 DB·Redis (운영 Compose는 나중에 deploy/ 아래에 따로 둠)
+# 산학 프로젝트 컨테이너(5432)랑 안 겹치게 포트를 5433·6380으로 잡음
+name: mindcare
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: mindcare-postgres
+    ports:
+      - "127.0.0.1:5433:5432"
+    environment:
+      POSTGRES_DB: mindcare
+      POSTGRES_USER: mindcare
+      POSTGRES_PASSWORD: mindcare
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7.4
+    container_name: mindcare-redis
+    ports:
+      - "127.0.0.1:6380:6379"
+
+volumes:
+  postgres-data:
