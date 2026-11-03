@@ -1,0 +1,37 @@
+HELP.md
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### VS Code ###
+.vscode/
+
+### OS ###
+.DS_Store
+Thumbs.db
+
+### Secrets — Public 레포라서 절대 커밋 금지 ###
+.env
+.env.*
+!.env.example
+secrets/
+*-firebase-adminsdk-*.json
+serviceAccount*.json
+application-secret.yml
+*.pem
+*.key
+
+### Logs ###
+*.log
+logs/
