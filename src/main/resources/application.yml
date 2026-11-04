@@ -1,0 +1,56 @@
+# 모든 환경 공통 설정
+# 환경별 값(DB 주소·비밀번호 등)은 환경변수로 넣음. staging·prod는 EC2의 .env에서 주입
+
+spring:
+  application:
+    name: mindcare-backend
+  config:
+    import: optional:file:.env[.properties]
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  data:
+    redis:
+      url: ${REDIS_URL}
+  jpa:
+    open-in-view: false
+    hibernate:
+      # 스키마는 Flyway가 만들고, JPA는 엔티티랑 맞는지만 검사
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  jackson:
+    # TRD 12-1: JSON 필드는 snake_case
+    property-naming-strategy: SNAKE_CASE
+    time-zone: UTC
+
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    # TRD 12장: 모든 API는 /v1 아래
+    context-path: /v1
+  # Nginx 뒤에서 실제 클라이언트 IP·https 여부를 읽음
+  forward-headers-strategy: native
+
+springdoc:
+  # TRD 12장: /v1/openapi.json, /v1/docs
+  api-docs:
+    path: /openapi.json
+  swagger-ui:
+    path: /docs
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+app:
+  cors:
+    # TRD 6-5: Firebase 도메인 + 로컬 프론트만 허용 (콤마 구분)
+    allowed-origins: ${CORS_ORIGINS:http://localhost:5173}

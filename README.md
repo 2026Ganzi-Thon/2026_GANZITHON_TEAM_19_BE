@@ -24,7 +24,7 @@ docker compose up -d
 
 ## 규칙
 
-코드 규칙·패키지 구조·응답 형식은 [CLAUDE.md](CLAUDE.md) 참고 (사람이랑 AI가 같이 보는 규칙 파일).
+코드 규칙·패키지 구조·응답 형식은 [AGENTS.md](AGENTS.md) 참고 (사람이랑 AI가 같이 보는 규칙 파일).
 
 > ⚠️ Public 레포입니다. `.env`, Firebase 서비스 계정 JSON, AWS 키는 절대 커밋하지 마세요.
 > 개발 마감 2026-11-20(금) 23:59 이후 커밋 금지 (실격).
