@@ -13,6 +13,7 @@
 - PostgreSQL 17 + Flyway (스키마는 Flyway만 바꾼다. `ddl-auto: validate`)
 - Spring Data JPA, Redis, springdoc-openapi
 - 인증: Firebase ID 토큰 검증 (자체 JWT·비밀번호 없음)
+- 실시간 채팅: STOMP over WebSocket (TRD D-07의 Socket.IO 대신, 프론트는 `@stomp/stompjs`)
 
 ## 패키지 구조
 
@@ -29,8 +30,13 @@ com.mindcare
       └─ 각 도메인: controller / service / repository / entity / dto
 ```
 
-- 다른 담당자의 도메인 패키지는 직접 고치지 않는다. 필요하면 그 도메인의 **service 메서드**를 호출하고, 없으면 담당자에게 요청한다.
 - controller는 요청 검증·응답 변환만. 비즈니스 규칙·권한 판단은 service. DB 접근은 repository.
+
+## 도메인 간 규칙
+- 다른 담당자의 도메인 패키지는 직접 고치지 않는다. 엔티티도 각자 자기 도메인 것만 만든다.
+- **상대 도메인의 테이블은 직접 바꾸지 않는다.** 상대 repository를 쓰지 말고 그 도메인의 **service 메서드**를 호출한다. 메서드가 없으면 담당자에게 요청하고, 이름과 형태는 필요할 때 맞춘다.
+  - 예: 결제 완료 → 세션 확정, 예약 → 슬롯 상태 변경, 슈퍼비전 제출 → 정산 해제
+- **다른 도메인의 사용자는 `User` 엔티티 대신 `UUID`로 저장한다** (예: `private UUID clientId;`). 사용자 정보가 필요하면 user 도메인의 service로 조회한다.
 
 ## API 규칙 (TRD 12장)
 - 모든 경로는 `/v1` 아래 (`server.servlet.context-path`로 붙음 → 컨트롤러에는 `/v1` 빼고 적는다).
@@ -45,7 +51,8 @@ com.mindcare
 
 ## DB 마이그레이션 (Flyway)
 - 위치: `src/main/resources/db/migration/`
-- 파일명: `V{번호}__{설명}.sql` (예: `V2__users.sql`). 번호는 머지 순서대로, 충돌하면 나중 PR이 번호를 올린다.
+- TRD 11장 테이블 28개는 `V2__init_schema.sql`에 전부 들어 있다. 새로 만들지 말고 엔티티만 맞춰서 만든다.
+- 파일명: `V{번호}__{설명}.sql` (예: `V3__add_session_note.sql`). 추가할 때는 main의 최신 번호를 확인하고, 겹치면 나중에 머지하는 쪽이 번호를 올린다.
 - 이미 main에 머지된 마이그레이션 파일은 절대 수정하지 않는다. 고칠 게 있으면 새 파일을 만든다.
 - DDL은 TRD 11장 그대로. 상태값은 enum 타입 대신 `text + check`.
 - `_enc` 컬럼(민감정보)은 애플리케이션에서 AES-256-GCM으로 암호화해서 `bytea`로 저장한다.
