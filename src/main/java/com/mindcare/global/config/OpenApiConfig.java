@@ -1,5 +1,8 @@
 package com.mindcare.global.config;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import io.swagger.v3.core.jackson.ModelResolver;
+import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -16,6 +19,13 @@ import org.springframework.context.annotation.Configuration;
 public class OpenApiConfig {
 
     private static final String BEARER = "firebase";
+
+    // springdoc은 앱의 Jackson 설정을 안 따라가서, 실제 응답과 같은 snake_case로 문서를 만들도록 따로 지정
+    @Bean
+    public ModelResolver snakeCaseModelResolver() {
+        return new ModelResolver(Json.mapper().copy()
+                .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE));
+    }
 
     @Bean
     public OpenAPI openAPI() {
