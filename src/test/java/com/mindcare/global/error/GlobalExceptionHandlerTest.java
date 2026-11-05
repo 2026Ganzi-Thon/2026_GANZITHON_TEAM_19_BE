@@ -50,7 +50,7 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void AppException은_TRD_오류_형식으로_나간다() throws Exception {
-        mockMvc.perform(get("/test/conflict").header(RequestIdFilter.HEADER, "req_abc123"))
+        mockMvc.perform(get("/public/test/conflict").header(RequestIdFilter.HEADER, "req_abc123"))
                 .andExpect(status().isConflict())
                 .andExpect(header().string(RequestIdFilter.HEADER, "req_abc123"))
                 .andExpect(jsonPath("$.error.code").value("SLOT_TAKEN"))
@@ -61,14 +61,14 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void 요청ID가_없으면_서버가_만든다() throws Exception {
-        mockMvc.perform(get("/test/conflict"))
+        mockMvc.perform(get("/public/test/conflict"))
                 .andExpect(header().exists(RequestIdFilter.HEADER))
                 .andExpect(jsonPath("$.error.request_id").isNotEmpty());
     }
 
     @Test
     void 바디_검증_실패는_422와_snake_case_필드명() throws Exception {
-        mockMvc.perform(post("/test/validate").contentType(MediaType.APPLICATION_JSON).content("{\"display_name\": \"\"}"))
+        mockMvc.perform(post("/public/test/validate").contentType(MediaType.APPLICATION_JSON).content("{\"display_name\": \"\"}"))
                 .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"))
                 .andExpect(jsonPath("$.error.details.fields[0].field").value("display_name"))
@@ -77,7 +77,7 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void UUID_형식이_아니면_422() throws Exception {
-        mockMvc.perform(get("/test/items/not-a-uuid"))
+        mockMvc.perform(get("/public/test/items/not-a-uuid"))
                 .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"))
                 .andExpect(jsonPath("$.error.details.fields[0].field").value("id"));
@@ -85,7 +85,7 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void 깨진_JSON은_400() throws Exception {
-        mockMvc.perform(post("/test/validate").contentType(MediaType.APPLICATION_JSON).content("{broken"))
+        mockMvc.perform(post("/public/test/validate").contentType(MediaType.APPLICATION_JSON).content("{broken"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error.code").value("BAD_REQUEST"));
     }
@@ -99,7 +99,7 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void 알수없는_예외는_500이고_내부_메시지를_숨긴다() throws Exception {
-        mockMvc.perform(get("/test/boom"))
+        mockMvc.perform(get("/public/test/boom"))
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.error.code").value("INTERNAL"))
                 .andExpect(jsonPath("$.error.message").value("일시적인 오류가 발생했습니다"));
@@ -107,7 +107,7 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void 목록_응답은_items와_next_cursor() throws Exception {
-        mockMvc.perform(get("/test/page"))
+        mockMvc.perform(get("/public/test/page"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items[0].display_name").value("하늘"))
                 .andExpect(jsonPath("$.next_cursor").isEmpty());
@@ -116,25 +116,25 @@ class GlobalExceptionHandlerTest {
     @RestController
     static class TestController {
 
-        @GetMapping("/test/conflict")
+        @GetMapping("/public/test/conflict")
         void conflict() {
             throw new AppException(ErrorCode.SLOT_TAKEN, Map.of("slot_id", "s-1"));
         }
 
-        @PostMapping("/test/validate")
+        @PostMapping("/public/test/validate")
         void validate(@Valid @RequestBody NameRequest request) {
         }
 
-        @GetMapping("/test/items/{id}")
+        @GetMapping("/public/test/items/{id}")
         void item(@PathVariable UUID id) {
         }
 
-        @GetMapping("/test/boom")
+        @GetMapping("/public/test/boom")
         void boom() {
             throw new IllegalStateException("db password is hunter2");
         }
 
-        @GetMapping("/test/page")
+        @GetMapping("/public/test/page")
         PageResponse<NameRequest> page() {
             return PageResponse.last(List.of(new NameRequest("하늘")));
         }

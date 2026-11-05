@@ -38,6 +38,15 @@ com.mindcare
   - 예: 결제 완료 → 세션 확정, 예약 → 슬롯 상태 변경, 슈퍼비전 제출 → 정산 해제
 - **다른 도메인의 사용자는 `User` 엔티티 대신 `UUID`로 저장한다** (예: `private UUID clientId;`). 사용자 정보가 필요하면 user 도메인의 service로 조회한다.
 
+## 인증 (TRD 6-1, 12-1)
+- 공개 경로를 뺀 모든 API는 `AuthInterceptor`가 Firebase 토큰을 확인한다. 공개 경로는 `/public/**`, `/health`, `/certificates/verify/**`, API 문서뿐이다 (`WebConfig`).
+- 로그인 사용자는 컨트롤러 파라미터 `@LoginUser AuthUser user`로 받는다. 가입 전이면 404 `USER_NOT_REGISTERED`가 자동으로 나간다.
+- 역할·계정 상태 확인은 service에서 `user.requireRole(UserRole.CLIENT)`를 호출한다. 역할이 다르면 `FORBIDDEN_ROLE`, active가 아니면 상태별 오류가 나간다.
+- 정지·심사 중 계정도 허용하는 API(예: `GET /me`)는 `requireRole`을 부르지 않는다.
+- 해당 세션의 당사자인지 같은 자원 권한은 각 도메인 service에서 따로 확인한다 (`FORBIDDEN_RESOURCE`).
+- 테스트에서는 `@MockitoBean TokenVerifier`로 토큰 검증을 대신한다 (`MeControllerTest` 참고).
+- Firebase 키 경로는 환경변수 `FIREBASE_CREDENTIALS_PATH`. local은 없어도 서버가 뜨지만 모든 토큰이 거절된다.
+
 ## API 규칙 (TRD 12장)
 - 모든 경로는 `/v1` 아래 (`server.servlet.context-path`로 붙음 → 컨트롤러에는 `/v1` 빼고 적는다).
 - 경로는 kebab-case 복수형 (`/me/device-tokens`, `/sessions/{id}`).
