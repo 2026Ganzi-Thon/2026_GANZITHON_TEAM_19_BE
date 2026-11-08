@@ -14,7 +14,7 @@ public class Job {
  @Column(nullable=false) private String type;
  @Column(nullable=false) private String dedupKey;
  @JdbcTypeCode(SqlTypes.JSON) @Column(nullable=false,columnDefinition="jsonb") private Map<String,String> payload;
- @Enumerated(EnumType.STRING) @Column(nullable=false) private JobStatus status;
+ @Column(nullable=false) private JobStatus status;
  @Column(nullable=false) private short attempts;
  @Column(nullable=false) private short maxAttempts;
  @Column(nullable=false) private Instant runAt;
