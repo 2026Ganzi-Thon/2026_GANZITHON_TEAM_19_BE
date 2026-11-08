@@ -20,4 +20,20 @@ public class SessionService {
         if (moodCheckRepository.existsBySessionIdAndPhase(sessionId, request.phase())) throw new AppException(ErrorCode.ALREADY_SUBMITTED);
         moodCheckRepository.save(new MoodCheck(session, userService.getById(clientId), request.phase(), request.score()));
     }
+
+    @Transactional public void cancel(UUID actorId, UUID sessionId, String reason) {
+        Session session = sessionRepository.findById(sessionId).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND));
+        if (!session.getClient().getId().equals(actorId) && !session.getProvider().getId().equals(actorId)) {
+            throw new AppException(ErrorCode.FORBIDDEN_RESOURCE);
+        }
+        try { session.cancel(actorId, reason); }
+        catch (IllegalStateException e) { throw new AppException(ErrorCode.INVALID_STATE); }
+    }
+
+    @Transactional public void end(UUID providerId, UUID sessionId) {
+        Session session = sessionRepository.findById(sessionId).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND));
+        if (!session.getProvider().getId().equals(providerId)) throw new AppException(ErrorCode.FORBIDDEN_RESOURCE);
+        try { session.complete(); }
+        catch (IllegalStateException e) { throw new AppException(ErrorCode.INVALID_STATE); }
+    }
 }

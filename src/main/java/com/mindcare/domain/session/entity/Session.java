@@ -21,4 +21,22 @@ public class Session {
     @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "client_id", nullable = false) private User client;
     @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "provider_id", nullable = false) private User provider;
     private SessionStatus status;
+    private String cancelReason;
+    private UUID cancelledBy;
+
+    public void cancel(UUID actorId, String reason) {
+        if (status == SessionStatus.COMPLETED || status == SessionStatus.CANCELLED) {
+            throw new IllegalStateException("Session cannot be cancelled in its current state");
+        }
+        status = SessionStatus.CANCELLED;
+        cancelReason = reason;
+        cancelledBy = actorId;
+    }
+
+    public void complete() {
+        if (status != SessionStatus.IN_PROGRESS && status != SessionStatus.CONFIRMED) {
+            throw new IllegalStateException("Session cannot be completed in its current state");
+        }
+        status = SessionStatus.COMPLETED;
+    }
 }
