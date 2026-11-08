@@ -1,0 +1,5 @@
+package com.mindcare.domain.kpi.service;
+import com.mindcare.domain.kpi.entity.AnalyticsEvent; import com.mindcare.domain.kpi.repository.AnalyticsEventRepository; import com.mindcare.global.error.*; import java.util.*; import lombok.RequiredArgsConstructor; import org.springframework.stereotype.Service; import org.springframework.transaction.annotation.Transactional;
+@Service @RequiredArgsConstructor @Transactional public class KpiEventService { private final AnalyticsEventRepository events; private static final Set<String> NAMES=Set.of("signup_completed","intake_created","session_completed","referral_accepted","payment_succeeded");
+ public void record(String eid,String name,Map<String,String> props){if(!NAMES.contains(name)||props.keySet().stream().anyMatch(this::sensitive))throw new AppException(ErrorCode.VALIDATION_ERROR);if(!events.existsByEid(eid))events.save(new AnalyticsEvent(eid,name,props));}
+ private boolean sensitive(String key){String k=key.toLowerCase(Locale.ROOT);return k.contains("email")||k.contains("phone")||k.contains("name")||k.contains("text")||k.contains("message");}}
