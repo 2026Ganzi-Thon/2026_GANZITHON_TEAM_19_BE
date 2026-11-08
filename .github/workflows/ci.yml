@@ -1,12 +1,12 @@
 name: Backend CI
 
 on:
-  # main으로 들어가는 PR을 올리거나 커밋을 추가할 때
+  # develop·main으로 들어가는 PR을 올리거나 커밋을 추가할 때
   pull_request:
-    branches: [main]
-  # main에 머지됐을 때 (배포 job은 인프라 PR에서 추가)
+    branches: [develop, main]
+  # develop·main에 머지됐을 때 (배포 job은 인프라 PR에서 추가)
   push:
-    branches: [main]
+    branches: [develop, main]
   workflow_dispatch:
 
 concurrency:

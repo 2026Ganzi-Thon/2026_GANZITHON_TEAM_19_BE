@@ -3,9 +3,9 @@
 사람이랑 AI(Codex, Claude Code 등)가 모두 이 규칙을 따른다. Codex는 이 파일을, Claude Code는 `CLAUDE.md`를 통해 이 파일을 읽는다. 규칙을 바꾸려면 PR로 이 파일을 먼저 고친다.
 
 ## 명세 기준
-- **TRD 백엔드 v0.4가 기준이다.** DB 스키마(11장), API 명세(13장), 비즈니스 규칙(15장)은 TRD 그대로 따른다.
-- TRD의 Python/FastAPI 코드 예시는 **참고만** 하고 스프링으로 옮겨서 짠다 (백엔드는 스프링부트로 통일, TRD D-06 대안).
-- TRD랑 다르게 구현해야 하면 PR 설명에 적고 기획(김준성)에게 알린다 (TRD: 코드가 먼저 바뀌면 24시간 안에 문서를 맞춤).
+- **기능 스펙은 TRD 백엔드 v0.5.1이 기준이다.** DB 스키마(11장), API 명세(13장), 실시간(14장), 비즈니스 규칙(15장)은 TRD 그대로 따른다.
+- **코드 구조는 이 파일이 우선이다.** TRD의 폴더·클래스·코드 예시와 이 파일이 다르면 이 파일대로 짠다 (아래 "TRD와 다른 코드 구조").
+- 기능 스펙을 TRD와 다르게 구현해야 하면 PR 설명에 적고 기획(김준성)에게 알린다 (TRD: 코드가 먼저 바뀌면 24시간 안에 문서를 맞춤).
 - 간지톤 범위: P0(Phase 1·2)만 먼저. P1(Phase 3)은 P0가 끝난 뒤.
 
 ## 스택
@@ -14,6 +14,21 @@
 - Spring Data JPA, Redis, springdoc-openapi
 - 인증: Firebase ID 토큰 검증 (자체 JWT·비밀번호 없음)
 - 실시간 채팅: STOMP over WebSocket (TRD D-07의 Socket.IO 대신, 프론트는 `@stomp/stompjs`)
+
+## TRD와 다른 코드 구조
+백엔드 회의에서 정한 구조를 유지한다 (11/5 합의). 프론트에서 보이는 동작은 TRD와 같다.
+
+| 항목 | TRD v0.5.1 | 이 레포 |
+| --- | --- | --- |
+| Java | 25 | 21 |
+| 빌드 | Gradle Kotlin DSL, `server/` 폴더 | Gradle Groovy, 레포 최상단 |
+| 패키지 | `kr.mindcare`, `common/` | `com.mindcare`, `global/` |
+| 인증 | Spring Security 필터, `CurrentUser` | `AuthInterceptor`, `@LoginUser AuthUser` |
+| 권한 | `@RequireRole` | service에서 `user.requireRole(...)` |
+| 토큰 폐기 | `tokens_revoked_at`로 서버에서 판단 | `verifyIdToken(token, true)`로 Firebase에 확인 (`tokens_revoked_at` 컬럼은 있지만 아직 안 씀) |
+| 마이그레이션 | `V<yyyyMMddHHmm>__` | `V{번호}__` |
+
+AI 서버(FastAPI)는 TRD대로 이 레포의 `ai/` 폴더에 둔다 (담당: 김준성). 스프링 코드 위치는 그대로라 `ai/`만 추가된다.
 
 ## 패키지 구조
 
@@ -60,15 +75,17 @@ com.mindcare
 
 ## DB 마이그레이션 (Flyway)
 - 위치: `src/main/resources/db/migration/`
-- TRD 11장 테이블 28개는 `V2__init_schema.sql`에 전부 들어 있다. 새로 만들지 말고 엔티티만 맞춰서 만든다.
-- 파일명: `V{번호}__{설명}.sql` (예: `V3__add_session_note.sql`). 추가할 때는 main의 최신 번호를 확인하고, 겹치면 나중에 머지하는 쪽이 번호를 올린다.
-- 이미 main에 머지된 마이그레이션 파일은 절대 수정하지 않는다. 고칠 게 있으면 새 파일을 만든다.
+- TRD 11장 테이블 30개(업무 28 + `jobs`, `shedlock`)는 `V2`, `V3`에 전부 들어 있다. 새로 만들지 말고 엔티티만 맞춰서 만든다.
+- 파일명: `V{번호}__{설명}.sql` (예: `V4__add_session_note.sql`). 추가할 때는 develop의 최신 번호를 확인하고, 겹치면 나중에 머지하는 쪽이 번호를 올린다.
+- 이미 머지된 마이그레이션 파일은 절대 수정하지 않는다. 고칠 게 있으면 새 파일을 만든다.
 - DDL은 TRD 11장 그대로. 상태값은 enum 타입 대신 `text + check`.
 - `_enc` 컬럼(민감정보)은 애플리케이션에서 AES-256-GCM으로 암호화해서 `bytea`로 저장한다.
 
 ## Git
-- 브랜치: GitHub Flow. `main` 직접 push 금지, PR + CI 통과 + 리뷰 1명.
-- 브랜치명: `feat/<영역>-<내용>`, `fix/<영역>-<내용>` (예: `feat/auth-firebase`)
+- `develop`이 기본 작업 브랜치다. 작업 브랜치는 `develop`에서 따고 PR도 `develop`으로 보낸다.
+- `main`은 배포할 코드만 받는다 (`develop` → `main` 릴리스 PR). `develop`·`main` 직접 push 금지.
+- 머지: 각자 도메인 PR은 CI 통과 후 본인이 머지한다. `global/`, 마이그레이션, 이 파일, 상대 도메인에 영향 주는 변경은 상대 확인 후 머지한다.
+- 브랜치명: `feat/<영역>-<내용>`, `fix/<영역>-<내용>`, `chore/<내용>`, `docs/<내용>` (예: `feat/auth-firebase`)
 - 커밋: Conventional Commits (`feat(auth): Firebase 토큰 검증`, `fix(slot): 겹침 검사`)
 - 커밋은 작게, PR은 기능 단위로.
 
