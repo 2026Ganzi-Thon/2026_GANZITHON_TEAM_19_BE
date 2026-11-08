@@ -11,4 +11,7 @@ public class Complaint {
  @Column(nullable=false) private String source; @Column(nullable=false) private String category; private byte[] descriptionEnc; private byte[] maskedTranscriptEnc;
  @Column(nullable=false) private String status="received"; private String decision; private String decisionReason; private UUID decidedBy; private Instant decidedAt;
  @CreationTimestamp @Column(nullable=false,updatable=false) private Instant createdAt;
+ @Builder public Complaint(UUID sessionId,UUID reporterId,UUID targetId,String source,String category,byte[] descriptionEnc){this.sessionId=sessionId;this.reporterId=reporterId;this.targetId=targetId;this.source=source;this.category=category;this.descriptionEnc=descriptionEnc;}
+ public void beginReview(){if(!"received".equals(status))throw new IllegalStateException();status="in_review";}
+ public void decide(String value,String reason,UUID adminId){if(!"in_review".equals(status))throw new IllegalStateException();decision=value;decisionReason=reason;decidedBy=adminId;decidedAt=Instant.now();status="decided";}
 }
