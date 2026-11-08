@@ -12,4 +12,5 @@ public class Certificate {
  @Column(nullable=false) private String status="generating";
  private String fileKey; private Double hours; private Integer sessionCount; private Integer supervisionCount; private Instant issuedAt;
  @CreationTimestamp @Column(nullable=false,updatable=false) private Instant createdAt;
+ public boolean isPubliclyVerifiable(){return "ready".equals(status)&&issuedAt!=null;}
 }
