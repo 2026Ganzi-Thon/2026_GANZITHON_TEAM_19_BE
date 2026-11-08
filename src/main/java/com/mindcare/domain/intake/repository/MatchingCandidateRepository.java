@@ -1,5 +1,6 @@
 package com.mindcare.domain.intake.repository;
 
+import com.mindcare.domain.intake.entity.Match;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -8,7 +9,7 @@ import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 
 /** Read-only matching projection. Provider profiles stay owned by the provider domain. */
-public interface MatchingCandidateRepository extends Repository<Object, UUID> {
+public interface MatchingCandidateRepository extends Repository<Match, UUID> {
     @Query(value = """
             select pp.user_id as providerId, pp.display_name as displayName, pp.track as providerTrack,
                    pp.specialties as specialties, min(s.start_at) as earliestSlot,
