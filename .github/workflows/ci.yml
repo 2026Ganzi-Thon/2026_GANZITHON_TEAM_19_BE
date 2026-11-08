@@ -54,6 +54,8 @@ jobs:
       REDIS_URL: redis://localhost:6379
       # 테스트 전용 AES-256 키 (32-byte Base64). 운영 키는 환경 시크릿으로 별도 주입한다.
       APP_ENCRYPTION_KEY: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+      # 테스트 전용 HMAC 키 (32-byte Base64)
+      APP_HMAC_KEY: bWluZGNhcmUtbG9jYWwtaG1hYy1rZXktMzJieXRlcyE=
 
     steps:
       - name: 코드 가져오기
