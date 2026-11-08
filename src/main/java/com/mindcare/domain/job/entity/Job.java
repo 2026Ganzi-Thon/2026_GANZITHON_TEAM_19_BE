@@ -20,4 +20,7 @@ public class Job {
  @Column(nullable=false) private Instant runAt;
  @CreationTimestamp @Column(nullable=false,updatable=false) private Instant createdAt;
  public Job(String type,String dedupKey,Map<String,String> payload){this.type=type;this.dedupKey=dedupKey;this.payload=Map.copyOf(payload);status=JobStatus.QUEUED;maxAttempts=3;runAt=Instant.now();}
+ public void start() { if(status!=JobStatus.QUEUED) throw new IllegalStateException("Job is not queued"); status=JobStatus.RUNNING; attempts++; }
+ public void succeed() { if(status!=JobStatus.RUNNING) throw new IllegalStateException("Job is not running"); status=JobStatus.SUCCEEDED; }
+ public void fail() { if(status!=JobStatus.RUNNING) throw new IllegalStateException("Job is not running"); status=attempts>=maxAttempts?JobStatus.FAILED:JobStatus.QUEUED; runAt=Instant.now().plusSeconds(30L*Math.max(1,attempts)); }
 }
