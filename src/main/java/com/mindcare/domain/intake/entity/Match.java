@@ -19,4 +19,20 @@ public class Match {
     @JdbcTypeCode(SqlTypes.JSON) @Column(nullable = false, columnDefinition = "jsonb") private List<String> reasons;
     @Column(nullable = false) private short rank;
     @CreationTimestamp @Column(nullable = false, updatable = false) private Instant createdAt;
+
+    @Builder(access = AccessLevel.PRIVATE)
+    private Match(Intake intake, UUID providerId, String track, BigDecimal score, List<String> reasons, short rank) {
+        this.intake = intake;
+        this.providerId = providerId;
+        this.track = track;
+        this.score = score;
+        this.reasons = List.copyOf(reasons);
+        this.rank = rank;
+    }
+
+    public static Match create(Intake intake, UUID providerId, String track, BigDecimal score,
+            List<String> reasons, short rank) {
+        return Match.builder().intake(intake).providerId(providerId).track(track).score(score)
+                .reasons(reasons).rank(rank).build();
+    }
 }

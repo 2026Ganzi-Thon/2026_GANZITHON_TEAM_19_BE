@@ -11,8 +11,11 @@ import java.util.UUID;
 public record IntakeResponse(UUID intakeId, IntakeCategory category, Map<String, List<String>> aiTags,
         boolean aiFallback, Risk risk, List<Match> matches) {
     public static IntakeResponse created(Intake intake) {
+        return created(intake, List.of());
+    }
+    public static IntakeResponse created(Intake intake, List<Match> matches) {
         return new IntakeResponse(intake.getId(), intake.getCategory(), intake.getAiTags(),
-                "fallback".equals(intake.getAiStatus()), new Risk(intake.getRiskLevel()), List.of());
+                "fallback".equals(intake.getAiStatus()), new Risk(intake.getRiskLevel()), matches);
     }
     public record Risk(RiskLevel level) { }
     public record Match(UUID providerId, String displayName, String track, List<String> specialties,
