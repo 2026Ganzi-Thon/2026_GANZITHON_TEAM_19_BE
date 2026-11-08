@@ -140,6 +140,20 @@ public class SlotService {
                 expiresAt, pricing.price());
     }
 
+    /**
+     * 결제 준비·확정(PAY-02·03)에서 호출. 홀드가 살아 있는지 확인한다.
+     * 10분이 지났거나 이미 풀렸으면 410 HOLD_EXPIRED, 이미 예약 완료면 409 INVALID_STATE.
+     */
+    public void assertHoldActive(UUID slotId) {
+        AvailabilitySlot slot = slotRepository.findById(slotId).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND));
+        if (slot.getStatus() == SlotStatus.BOOKED) {
+            throw new AppException(ErrorCode.INVALID_STATE, Map.of("current", "booked"));
+        }
+        if (slot.getStatus() != SlotStatus.HELD || !slot.getHoldExpiresAt().isAfter(clock.instant())) {
+            throw new AppException(ErrorCode.HOLD_EXPIRED);
+        }
+    }
+
     /** 결제 확정(PAY-03)에서 호출. held → booked. 홀드 상태가 아니면 409 INVALID_STATE. */
     @Transactional
     public void book(UUID slotId, UUID sessionId) {
