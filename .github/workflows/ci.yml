@@ -52,6 +52,8 @@ jobs:
       # CI 컨테이너는 기본 포트(5432·6379)라서 로컬 기본값(5433·6380) 대신 덮어씀
       DB_URL: jdbc:postgresql://localhost:5432/mindcare
       REDIS_URL: redis://localhost:6379
+      # 테스트 전용 AES-256 키 (32-byte Base64). 운영 키는 환경 시크릿으로 별도 주입한다.
+      APP_ENCRYPTION_KEY: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
 
     steps:
       - name: 코드 가져오기
