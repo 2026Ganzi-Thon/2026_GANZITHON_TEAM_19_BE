@@ -51,6 +51,9 @@ management:
         include: health
 
 app:
+  crypto:
+    # Base64 인코딩한 32-byte AES-256 키. 환경변수로만 주입하며 저장소에 넣지 않는다.
+    encryption-key: ${APP_ENCRYPTION_KEY}
   firebase:
     # 서비스 계정 JSON 경로. 레포 밖에 두고 환경변수로만 지정 (Public 레포라 커밋 금지)
     # local은 비워도 서버가 뜨지만 모든 토큰이 거절됨. staging·prod는 비어 있으면 서버가 안 뜸
