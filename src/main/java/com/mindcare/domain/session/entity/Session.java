@@ -8,6 +8,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.UUID;
+import java.time.Instant;
+import jakarta.persistence.Column;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -21,8 +23,16 @@ public class Session {
     @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "client_id", nullable = false) private User client;
     @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "provider_id", nullable = false) private User provider;
     private SessionStatus status;
+    @Column(nullable = false) private String track;
+    @Column(nullable = false) private Instant scheduledStart;
+    @Column(nullable = false) private Instant scheduledEnd;
+    private Instant endedAt;
+    private String endedBy;
     private String cancelReason;
     private UUID cancelledBy;
+    private byte[] providerNoteEnc;
+    private Short rating;
+    private byte[] reviewEnc;
 
     public void cancel(UUID actorId, String reason) {
         if (status == SessionStatus.COMPLETED || status == SessionStatus.CANCELLED) {
@@ -38,5 +48,13 @@ public class Session {
             throw new IllegalStateException("Session cannot be completed in its current state");
         }
         status = SessionStatus.COMPLETED;
+        endedAt = Instant.now();
+        endedBy = "provider";
+    }
+
+    public void writeNote(byte[] encryptedNote) { providerNoteEnc = encryptedNote; }
+    public void review(short value, byte[] encryptedReview) {
+        if (status != SessionStatus.COMPLETED || rating != null) throw new IllegalStateException("Session cannot be reviewed");
+        rating = value; reviewEnc = encryptedReview;
     }
 }
