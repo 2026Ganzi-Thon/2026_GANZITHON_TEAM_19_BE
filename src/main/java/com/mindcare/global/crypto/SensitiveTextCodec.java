@@ -34,4 +34,19 @@ public class SensitiveTextCodec {
             return ByteBuffer.allocate(nonce.length + encrypted.length).put(nonce).put(encrypted).array();
         } catch (GeneralSecurityException e) { throw new IllegalStateException("Unable to encrypt sensitive text", e); }
     }
+
+    public String decrypt(byte[] encrypted) {
+        try {
+            ByteBuffer data = ByteBuffer.wrap(encrypted);
+            byte[] nonce = new byte[NONCE_LENGTH];
+            data.get(nonce);
+            byte[] body = new byte[data.remaining()];
+            data.get(body);
+            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+            cipher.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(128, nonce));
+            return new String(cipher.doFinal(body), StandardCharsets.UTF_8);
+        } catch (GeneralSecurityException e) {
+            throw new IllegalStateException("Unable to decrypt sensitive text", e);
+        }
+    }
 }

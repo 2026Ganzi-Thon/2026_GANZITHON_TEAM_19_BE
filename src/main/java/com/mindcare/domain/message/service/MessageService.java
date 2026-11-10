@@ -1,0 +1,10 @@
+package com.mindcare.domain.message.service;
+import com.mindcare.domain.message.dto.*; import com.mindcare.domain.message.entity.*; import com.mindcare.domain.message.repository.*; import com.mindcare.domain.risk.LocalRiskDetector; import com.mindcare.global.crypto.SensitiveTextCodec; import com.mindcare.global.error.*;
+import java.util.*; import lombok.RequiredArgsConstructor; import org.springframework.stereotype.Service; import org.springframework.transaction.annotation.Transactional;
+@Service @RequiredArgsConstructor @Transactional(readOnly=true) public class MessageService {
+ private final MessageRepository messages; private final SessionParticipantRepository sessions; private final SensitiveTextCodec codec; private final LocalRiskDetector detector;
+ @Transactional public MessageResponse send(UUID actorId, UUID sessionId, MessageSendRequest request) { requireParticipant(actorId,sessionId); var duplicate=messages.findBySessionIdAndClientMsgId(sessionId,request.clientMsgId()); if(duplicate.isPresent()) return response(duplicate.get()); var risk=detector.assess(request.body()); Message stored=messages.save(Message.builder().sessionId(sessionId).senderId(actorId).kind("text").bodyEnc(codec.encrypt(request.body())).clientMsgId(request.clientMsgId()).riskLevel(risk.level().getValue()).build()); return response(stored); }
+ public List<MessageResponse> list(UUID actorId, UUID sessionId, UUID afterId) { requireParticipant(actorId,sessionId); return (afterId==null?messages.findTop100BySessionIdOrderByIdAsc(sessionId):messages.findTop100BySessionIdAndIdGreaterThanOrderByIdAsc(sessionId,afterId)).stream().map(this::response).toList(); }
+ private void requireParticipant(UUID actorId,UUID sessionId) { var s=sessions.findById(sessionId).orElseThrow(()->new AppException(ErrorCode.NOT_FOUND)); if(!actorId.equals(s.getClient().getId())&&!actorId.equals(s.getProvider().getId())) throw new AppException(ErrorCode.FORBIDDEN_RESOURCE); }
+ private MessageResponse response(Message m) { return new MessageResponse(m.getId(),m.getSessionId(),m.getSenderId(),codec.decrypt(m.getBodyEnc()),m.getRiskLevel(),m.getCreatedAt()); }
+}
