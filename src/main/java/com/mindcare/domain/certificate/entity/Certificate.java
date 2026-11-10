@@ -1,5 +1,6 @@
 package com.mindcare.domain.certificate.entity;
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.*;
@@ -10,7 +11,7 @@ public class Certificate {
  @Column(nullable=false) private UUID traineeId;
  @Column(nullable=false,unique=true) private String code;
  @Column(nullable=false) private String status="generating";
- private String fileKey; private Double hours; private Integer sessionCount; private Integer supervisionCount; private Instant issuedAt;
+ private String fileKey; private BigDecimal hours; private Integer sessionCount; private Integer supervisionCount; private Instant issuedAt;
  @CreationTimestamp @Column(nullable=false,updatable=false) private Instant createdAt;
  public boolean isPubliclyVerifiable(){return "ready".equals(status)&&issuedAt!=null;}
 }
