@@ -42,6 +42,14 @@ public class PriceConfigService {
         return rows.getFirst();
     }
 
+    /** 내담자 취소 시 전액 환불되는 기준 시간 (refund_policy.full_refund_hours, 기본 24). */
+    public int fullRefundHours() {
+        List<Integer> rows = jdbcTemplate.query(
+                "select (value->>'full_refund_hours')::int from price_configs where key = 'refund_policy'",
+                (rs, i) -> rs.getInt(1));
+        return rows.isEmpty() ? 24 : rows.getFirst();
+    }
+
     public record TrackPricing(int price, int durationMinutes, BigDecimal feeRate) {
     }
 }

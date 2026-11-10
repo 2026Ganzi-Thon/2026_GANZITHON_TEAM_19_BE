@@ -72,6 +72,8 @@ com.mindcare
 - 시간은 `Instant`(UTC)로 다루고 ISO 8601로 응답. KST 변환은 프론트에서.
 - 모든 PK는 UUID (TRD: UUIDv7).
 - 엔드포인트마다 `@Operation(operationId = "TRD API ID")`를 단다. 예: `@Operation(operationId = "USR-01")`.
+- TRD 12-1 멱등성 대상(SES-01, PAY-02~04)은 컨트롤러 메서드에 `@Idempotent`를 단다. `Idempotency-Key` 헤더가 필수가 되고, 같은 키 재요청은 첫 응답을 그대로 돌려준다 (Redis 24시간).
+- 민감정보는 `SensitiveTextCodec`(AES-256-GCM)으로 암호화하고, 같은 값인지 검색해야 하면 `HmacService`로 `_hmac` 컬럼을 만든다.
 
 ## DB 마이그레이션 (Flyway)
 - 위치: `src/main/resources/db/migration/`
