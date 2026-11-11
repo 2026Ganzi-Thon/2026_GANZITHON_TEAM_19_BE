@@ -1,0 +1,73 @@
+# 운영 서버(EC2 mindcare-prod) 전용. 로컬 개발은 레포 최상단 docker-compose.yml을 쓴다.
+# 값은 deploy.sh가 Parameter Store(/mindcare/prod/*)에서 읽어 만든 .env로 들어온다.
+# 밖으로 열리는 포트는 Caddy 80/443뿐. DB·Redis는 내부 네트워크에서만 접근 가능.
+
+services:
+  caddy:
+    image: caddy:2.8
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - app
+
+  app:
+    image: ${APP_IMAGE}
+    restart: unless-stopped
+    # deploy.sh 헬스체크용. 서버 안(127.0.0.1)에서만 열림
+    ports:
+      - "127.0.0.1:8090:8090"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SERVER_PORT: 8090
+      DB_URL: jdbc:postgresql://postgres:5432/mindcare
+      DB_USERNAME: mindcare
+      DB_PASSWORD: ${DB_PASSWORD}
+      REDIS_URL: redis://redis:6379
+      APP_ENCRYPTION_KEY: ${APP_ENCRYPTION_KEY}
+      APP_HMAC_KEY: ${APP_HMAC_KEY}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      FIREBASE_CREDENTIALS_PATH: /run/secrets/firebase.json
+      # t3.small(2GB)에서 DB·Redis·Caddy와 같이 돌리므로 힙을 메모리의 40%로 제한
+      JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=40
+    volumes:
+      - /opt/mindcare/secrets/firebase.json:/run/secrets/firebase.json:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mindcare
+      POSTGRES_USER: mindcare
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mindcare"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7.4
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres-data:
+  caddy-data:
+  caddy-config:
