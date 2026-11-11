@@ -13,6 +13,12 @@ spring:
     redis:
       url: ${REDIS_URL:redis://localhost:6380}
 
+app:
+  crypto:
+    # 로컬·CI 전용 공개 키 (CI ci.yml과 같은 값). staging·prod는 환경변수로 진짜 키를 넣는다
+    encryption-key: ${APP_ENCRYPTION_KEY:MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=}
+    hmac-key: ${APP_HMAC_KEY:bWluZGNhcmUtbG9jYWwtaG1hYy1rZXktMzJieXRlcyE=}
+
 logging:
   level:
     com.mindcare: debug

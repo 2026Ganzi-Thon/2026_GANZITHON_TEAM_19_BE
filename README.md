@@ -2,7 +2,7 @@
 
 2026 간지톤 19팀 — AI 기반 투트랙 정신건강 케어 플랫폼 백엔드
 
-- 명세: MindCare TRD 백엔드 v0.4 (팀 디스코드 공유본)
+- 명세: MindCare TRD 백엔드 v0.5.1 (팀 디스코드 공유본). 코드 구조는 [AGENTS.md](AGENTS.md) 우선
 - 스택: Spring Boot 4.1 · Java 21 · PostgreSQL 17 · Redis · Flyway · springdoc
 
 ## 로컬 실행

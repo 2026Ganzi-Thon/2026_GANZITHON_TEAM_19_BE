@@ -1,12 +1,12 @@
 name: Backend CI
 
 on:
-  # main으로 들어가는 PR을 올리거나 커밋을 추가할 때
+  # develop·main으로 들어가는 PR을 올리거나 커밋을 추가할 때
   pull_request:
-    branches: [main]
-  # main에 머지됐을 때 (배포 job은 인프라 PR에서 추가)
+    branches: [develop, main]
+  # develop·main에 머지됐을 때 (main이면 테스트 통과 후 deploy job까지)
   push:
-    branches: [main]
+    branches: [develop, main]
   workflow_dispatch:
 
 concurrency:
@@ -52,6 +52,10 @@ jobs:
       # CI 컨테이너는 기본 포트(5432·6379)라서 로컬 기본값(5433·6380) 대신 덮어씀
       DB_URL: jdbc:postgresql://localhost:5432/mindcare
       REDIS_URL: redis://localhost:6379
+      # 테스트 전용 AES-256 키 (32-byte Base64). 운영 키는 환경 시크릿으로 별도 주입한다.
+      APP_ENCRYPTION_KEY: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+      # 테스트 전용 HMAC 키 (32-byte Base64)
+      APP_HMAC_KEY: bWluZGNhcmUtbG9jYWwtaG1hYy1rZXktMzJieXRlcyE=
 
     steps:
       - name: 코드 가져오기
@@ -74,3 +78,90 @@ jobs:
       - name: 빌드 + 테스트
         # 컴파일, 테스트(스프링 시작 = Flyway·JPA 검증 포함)
         run: ./gradlew build
+
+  # main에 머지되면 운영 서버(EC2 mindcare-prod)에 배포
+  # OIDC로 AWS 역할을 받아서 액세스 키 없이 ECR push → SSM으로 deploy/deploy.sh 실행
+  # ⚠️ 11/20 23:59 마감 이후엔 main에 아무것도 머지하지 않는다 (커밋 = 실격)
+  deploy:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write
+
+    # 비밀값 아님 (계정 ID·리소스 이름). 비밀값은 EC2가 Parameter Store에서 직접 읽는다
+    env:
+      AWS_REGION: ap-northeast-2
+      AWS_ROLE_ARN: arn:aws:iam::286123979944:role/mindcare-prod-github-deploy
+      ECR_REPOSITORY: mindcare-prod-backend
+      EC2_INSTANCE_ID: i-0050ba2011ca82285
+
+    steps:
+      - name: 코드 가져오기
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: AWS 로그인 (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: ECR 로그인
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: 이미지 빌드 + push
+        env:
+          IMAGE: ${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+        run: |
+          # 태그 변경 불가(Immutable) 레포라, 재실행 때 같은 커밋 이미지가 있으면 건너뜀
+          if aws ecr describe-images --repository-name "$ECR_REPOSITORY" \
+               --image-ids imageTag="$GITHUB_SHA" > /dev/null 2>&1; then
+            echo "이미 있는 이미지: $IMAGE"
+          else
+            docker build -t "$IMAGE" .
+            docker push "$IMAGE"
+          fi
+
+      - name: 서버에 배포 (SSM)
+        env:
+          IMAGE_REPO: ${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}
+        run: |
+          RAW="https://raw.githubusercontent.com/$GITHUB_REPOSITORY/$GITHUB_SHA/deploy"
+          REL="/opt/mindcare/releases/$GITHUB_SHA"
+          jq -n --arg raw "$RAW" --arg rel "$REL" --arg sha "$GITHUB_SHA" --arg repo "$IMAGE_REPO" '{
+            commands: [
+              "set -eu",
+              "mkdir -p \($rel)",
+              "for f in docker-compose.prod.yml Caddyfile deploy.sh; do curl -fsSL \($raw)/$f -o \($rel)/$f; done",
+              "bash \($rel)/deploy.sh \($sha) \($repo)"
+            ]
+          }' > ssm-params.json
+
+          CMD_ID=$(aws ssm send-command \
+            --instance-ids "$EC2_INSTANCE_ID" \
+            --document-name AWS-RunShellScript \
+            --comment "mindcare deploy ${GITHUB_SHA::7}" \
+            --parameters file://ssm-params.json \
+            --query Command.CommandId --output text)
+          echo "SSM 명령: $CMD_ID"
+
+          # 최대 10분 대기
+          STATUS=Pending
+          for _ in $(seq 1 120); do
+            STATUS=$(aws ssm get-command-invocation --command-id "$CMD_ID" \
+              --instance-id "$EC2_INSTANCE_ID" --query Status --output text 2>/dev/null || echo Pending)
+            case "$STATUS" in
+              Pending|InProgress|Delayed) sleep 5 ;;
+              *) break ;;
+            esac
+          done
+
+          aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id "$EC2_INSTANCE_ID" \
+            --query '[StandardOutputContent, StandardErrorContent]' --output text || true
+          echo "결과: $STATUS"
+          [ "$STATUS" = "Success" ]

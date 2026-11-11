@@ -2,6 +2,7 @@ package com.mindcare.global.config;
 
 import com.mindcare.global.auth.AuthInterceptor;
 import com.mindcare.global.auth.LoginUserArgumentResolver;
+import com.mindcare.global.web.IdempotencyInterceptor;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +16,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     private final AuthInterceptor authInterceptor;
     private final LoginUserArgumentResolver loginUserArgumentResolver;
+    private final IdempotencyInterceptor idempotencyInterceptor;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
@@ -25,6 +27,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "/public/**", "/health", "/certificates/verify/**",
                         "/openapi.json", "/openapi.json/**", "/docs", "/docs/**", "/swagger-ui/**",
                         "/actuator/**", "/error");
+        // 인증 다음에 실행 (멱등 키를 사용자별로 나누기 위해 uid가 필요)
+        registry.addInterceptor(idempotencyInterceptor).addPathPatterns("/**");
     }
 
     @Override
