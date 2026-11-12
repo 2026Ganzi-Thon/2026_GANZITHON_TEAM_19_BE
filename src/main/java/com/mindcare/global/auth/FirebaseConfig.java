@@ -4,6 +4,7 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
 import com.mindcare.global.error.AppException;
 import com.mindcare.global.error.ErrorCode;
 import java.io.IOException;
@@ -40,6 +41,23 @@ public class FirebaseConfig {
             };
         }
         throw new IllegalStateException("FIREBASE_CREDENTIALS_PATH 환경변수가 필요합니다");
+    }
+
+    @Bean
+    public TokenRevoker tokenRevoker(@Value("${app.firebase.credentials-path}") String credentialsPath)
+            throws IOException {
+        if (!StringUtils.hasText(credentialsPath)) {
+            return uid -> log.debug("token revoke skipped (no Firebase key)");
+        }
+        FirebaseAuth auth = FirebaseAuth.getInstance(firebaseApp(credentialsPath));
+        return uid -> {
+            try {
+                auth.revokeRefreshTokens(uid);
+            } catch (FirebaseAuthException e) {
+                // 커밋 뒤에 불리므로 실패해도 상태 변경은 유지된다. 정지·영구정지는 requireActive가 막는다
+                log.error("Firebase revokeRefreshTokens failed: {}", e.getAuthErrorCode(), e);
+            }
+        };
     }
 
     private FirebaseApp firebaseApp(String credentialsPath) throws IOException {
