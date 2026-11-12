@@ -19,7 +19,8 @@ import org.springframework.web.servlet.HandlerInterceptor;
 @RequiredArgsConstructor
 public class AuthInterceptor implements HandlerInterceptor {
 
-    static final String FIREBASE_UID_ATTRIBUTE = "firebaseUid";
+    /** 검증된 Firebase uid. 가입(AUTH-01)처럼 @LoginUser를 못 쓰는 곳은 @RequestAttribute로 받는다. */
+    public static final String FIREBASE_UID_ATTRIBUTE = "firebaseUid";
 
     private static final String BEARER_PREFIX = "Bearer ";
 

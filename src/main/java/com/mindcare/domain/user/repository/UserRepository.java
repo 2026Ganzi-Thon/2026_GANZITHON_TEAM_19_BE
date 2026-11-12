@@ -8,4 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface UserRepository extends JpaRepository<User, UUID> {
 
     Optional<User> findByFirebaseUid(String firebaseUid);
+
+    boolean existsByFirebaseUid(String firebaseUid);
+
+    boolean existsByNickname(String nickname);
 }
