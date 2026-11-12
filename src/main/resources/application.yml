@@ -63,6 +63,13 @@ app:
   cors:
     # TRD 6-5: Firebase 도메인 + 로컬 프론트만 허용 (콤마 구분)
     allowed-origins: ${CORS_ORIGINS:http://localhost:5173}
+  seed:
+    # TRD 19-3 시드 계정 공통 비밀번호. Firebase 키가 있는 환경에서 --app.task=seed 실행 시 필수 (Parameter Store)
+    password: ${SEED_PASSWORD:}
+    # 시드 계정 이메일 도메인 (client1@<도메인>)
+    email-domain: ${SEED_EMAIL_DOMAIN:demo.mindcare.test}
+    # 시드와 같이 지울 다른 계정의 Firebase uid (운영 테스트 계정 정리용, 콤마 구분)
+    purge-uids: ${SEED_PURGE_UIDS:}
   storage:
     # s3 = 운영 (EC2 역할로 인증), memory = 로컬·테스트 (실제 업로드 없음)
     type: ${STORAGE_TYPE:memory}
