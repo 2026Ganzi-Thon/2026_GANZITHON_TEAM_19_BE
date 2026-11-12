@@ -137,7 +137,7 @@ jobs:
             commands: [
               "set -eu",
               "mkdir -p \($rel)",
-              "for f in docker-compose.prod.yml Caddyfile deploy.sh; do curl -fsSL \($raw)/$f -o \($rel)/$f; done",
+              "for f in docker-compose.prod.yml Caddyfile deploy.sh seed.sh; do curl -fsSL \($raw)/$f -o \($rel)/$f; done",
               "bash \($rel)/deploy.sh \($sha) \($repo)"
             ]
           }' > ssm-params.json
