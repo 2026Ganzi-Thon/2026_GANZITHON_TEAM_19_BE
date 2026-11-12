@@ -7,7 +7,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * USR-01 응답 (TRD의 MeOut). provider_profile은 프로필 기능을 만들 때 추가한다.
+ * USR-01·AUTH-01 응답 (TRD의 MeOut). provider_profile은 수련생·전문가가 프로필을 작성했을 때만 있다 (없으면 null).
  */
 public record MeResponse(
         UUID id,
@@ -16,9 +16,10 @@ public record MeResponse(
         String nickname,
         Instant suspendedUntil,
         Instant restrictedUntil,
-        boolean ethicsTrainingRequired) {
+        boolean ethicsTrainingRequired,
+        ProviderProfileResponse providerProfile) {
 
-    public static MeResponse from(User user) {
+    public static MeResponse from(User user, ProviderProfileResponse providerProfile) {
         return new MeResponse(
                 user.getId(),
                 user.getRole(),
@@ -26,6 +27,7 @@ public record MeResponse(
                 user.getNickname(),
                 user.getSuspendedUntil(),
                 user.getRestrictedUntil(),
-                user.isEthicsTrainingRequired());
+                user.isEthicsTrainingRequired(),
+                providerProfile);
     }
 }
