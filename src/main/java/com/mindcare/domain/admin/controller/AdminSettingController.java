@@ -1,6 +1,7 @@
 package com.mindcare.domain.admin.controller;
 
 import com.mindcare.domain.admin.dto.AppConfigResponse;
+import com.mindcare.domain.admin.dto.CrisisContact;
 import com.mindcare.domain.admin.dto.SettingResponse;
 import com.mindcare.domain.admin.dto.SettingUpdateRequest;
 import com.mindcare.domain.admin.service.AppConfigService;
@@ -10,6 +11,7 @@ import com.mindcare.global.auth.LoginUser;
 import com.mindcare.global.response.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,5 +43,11 @@ public class AdminSettingController {
     @GetMapping("/public/app-config")
     public AppConfigResponse appConfig() {
         return appConfigService.current();
+    }
+
+    @Operation(operationId = "PUB-01", summary = "위기 연락처 (비로그인, 점검 중에도 응답)")
+    @GetMapping("/public/crisis-contacts")
+    public List<CrisisContact> crisisContacts() {
+        return appConfigService.crisisContacts();
     }
 }

@@ -35,6 +35,7 @@ public class RegisterService {
 
     private final UserRepository userRepository;
     private final ConsentService consentService;
+    private final TermsCatalog termsCatalog;
 
     @Transactional
     public MeResponse register(String firebaseUid, RegisterRequest request) {
@@ -75,15 +76,22 @@ public class RegisterService {
         return MeResponse.from(user, null);
     }
 
-    // 같은 type이 두 번 오면 마지막 것만. 모르는 type이나 필수 동의 누락은 422
-    private static Map<String, String> consents(List<RegisterRequest.ConsentItem> items) {
+    // 같은 type이 두 번 오면 마지막 것만. 모르는 type, 지금 약관과 다른 버전(AUTH-02), 필수 동의 누락은 422
+    private Map<String, String> consents(List<RegisterRequest.ConsentItem> items) {
         Map<String, String> byType = new LinkedHashMap<>();
         for (RegisterRequest.ConsentItem item : items) {
             String type = item.type().strip();
             if (!SIGNUP_CONSENTS.contains(type)) {
                 throw invalid("consents", "unknown_type");
             }
-            byType.put(type, item.version().strip());
+            String version = item.version().strip();
+            String current = termsCatalog.currentVersion(type).orElseThrow();
+            if (!current.equals(version)) {
+                throw new AppException(ErrorCode.VALIDATION_ERROR, Map.of(
+                        "fields", List.of(Map.of("field", "consents", "reason", "outdated_version")),
+                        "type", type, "current_version", current));
+            }
+            byType.put(type, version);
         }
         if (!byType.keySet().containsAll(REQUIRED_CONSENTS)) {
             throw new AppException(ErrorCode.VALIDATION_ERROR, Map.of(
