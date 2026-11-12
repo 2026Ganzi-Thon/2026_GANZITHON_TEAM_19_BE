@@ -1,0 +1,23 @@
+{
+  "keywords": [
+    "취업 스트레스",
+    "면접 불안"
+  ],
+  "category": "career",
+  "candidates": [
+    {
+      "id": "provider-1",
+      "tags": [
+        "취업 스트레스",
+        "청년 진로"
+      ]
+    },
+    {
+      "id": "provider-2",
+      "tags": [
+        "가족 관계",
+        "상실·애도"
+      ]
+    }
+  ]
+}

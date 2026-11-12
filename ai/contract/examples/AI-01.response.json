@@ -1,0 +1,23 @@
+{
+  "emotions": [
+    "불안"
+  ],
+  "distortions": [
+    "파국화"
+  ],
+  "keywords": [
+    "취업 스트레스",
+    "대인관계 불안"
+  ],
+  "meta": {
+    "provider": "fake",
+    "model": "fake-1",
+    "prompt_version": "tag_intake.v1",
+    "tokens_in": 40,
+    "tokens_out": 50,
+    "latency_ms": 0,
+    "fallback": false,
+    "cache_hit": false,
+    "safety_filtered": false
+  }
+}

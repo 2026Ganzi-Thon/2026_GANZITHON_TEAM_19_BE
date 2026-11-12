@@ -1,0 +1,19 @@
+{
+  "level": "high",
+  "rule_hits": [
+    "suicidal_ideation"
+  ],
+  "llm_score": 0.05,
+  "evidence": "요즘은 그냥 다 그만두고 사라지고 싶어요.",
+  "meta": {
+    "provider": "fake",
+    "model": "fake-1",
+    "prompt_version": "assess_risk.v1",
+    "tokens_in": 49,
+    "tokens_out": 50,
+    "latency_ms": 0,
+    "fallback": false,
+    "cache_hit": false,
+    "safety_filtered": false
+  }
+}

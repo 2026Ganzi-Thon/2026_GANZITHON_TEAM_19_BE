@@ -1,0 +1,88 @@
+{
+  "chief_complaint": "여러 회기에 걸쳐 이어진 어려움을 이야기했습니다.",
+  "timeline": [
+    {
+      "session_no": 1,
+      "session_date": "2026-11-01",
+      "trainee_label": "수련생 A",
+      "key_points": [
+        "면접 탈락",
+        "자기 비난"
+      ]
+    },
+    {
+      "session_no": 2,
+      "session_date": "2026-11-08",
+      "trainee_label": "수련생 A",
+      "key_points": [
+        "수면 문제",
+        "가족의 기대"
+      ]
+    }
+  ],
+  "distortions": [
+    {
+      "name": "파국화",
+      "evidence": "저는 뭘 해도 안 될 것 같아요.",
+      "session_no": 1
+    },
+    {
+      "name": "파국화",
+      "evidence": "부모님 얼굴을 볼 면목이 없어요.",
+      "session_no": 2
+    }
+  ],
+  "triggers": [
+    "부담이 커지는 상황"
+  ],
+  "defenses": [
+    "혼자 견디려는 모습"
+  ],
+  "progress": "회기가 이어지면서 자기 마음을 말로 옮기는 일이 늘었습니다.",
+  "red_flag": {
+    "max_level": "low",
+    "history": [
+      {
+        "session_no": 1,
+        "level": "none",
+        "evidence": null
+      },
+      {
+        "session_no": 2,
+        "level": "low",
+        "evidence": null
+      }
+    ]
+  },
+  "focus_suggestions": [
+    "첫 회기에 최근 가장 힘들었던 순간을 함께 살펴보기"
+  ],
+  "client_summary": {
+    "chief_complaint": "그동안 나눈 이야기의 흐름을 정리했어요.",
+    "thinking_patterns": "힘들 때 가장 나쁜 결과를 먼저 떠올리는 순간이 있었어요.",
+    "triggers": "부담이 커질 때 마음이 더 힘들어지는 것 같아요.",
+    "coping": "전문 상담에서 이 부분을 조금 더 깊이 다뤄 볼 수 있어요.",
+    "safety_check": "오늘 대화에서 안전과 관련해 특별히 걱정되는 점은 보이지 않았어요.",
+    "sessions": [
+      {
+        "session_no": 1,
+        "line": "1회기에 나눈 이야기를 정리했어요."
+      },
+      {
+        "session_no": 2,
+        "line": "2회기에 나눈 이야기를 정리했어요."
+      }
+    ]
+  },
+  "meta": {
+    "provider": "fake",
+    "model": "fake-1",
+    "prompt_version": "referral_report.v1",
+    "tokens_in": 326,
+    "tokens_out": 50,
+    "latency_ms": 0,
+    "fallback": false,
+    "cache_hit": false,
+    "safety_filtered": false
+  }
+}
