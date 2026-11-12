@@ -42,6 +42,18 @@ public class PriceConfigService {
         return rows.getFirst();
     }
 
+    /** 슈퍼비전 1건 정산 단가 (supervision.price, TRD 15-5). 수수료 없음. */
+    public int supervisionPrice() {
+        List<Integer> rows = jdbcTemplate.query(
+                "select (value->>'price')::int from price_configs where key = 'supervision'",
+                (rs, i) -> rs.getInt(1));
+        if (rows.isEmpty()) {
+            log.error("price_configs 'supervision' is missing");
+            throw new AppException(ErrorCode.INTERNAL);
+        }
+        return rows.getFirst();
+    }
+
     /** 내담자 취소 시 전액 환불되는 기준 시간 (refund_policy.full_refund_hours, 기본 24). */
     public int fullRefundHours() {
         List<Integer> rows = jdbcTemplate.query(
