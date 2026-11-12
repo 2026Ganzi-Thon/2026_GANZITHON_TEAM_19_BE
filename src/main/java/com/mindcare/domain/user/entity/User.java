@@ -75,6 +75,16 @@ public class User {
         this.marketingOptIn = marketingOptIn;
     }
 
+    /** USR-02. 규칙·중복 검사는 UserService에서. */
+    public void changeNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    /** USR-07. 정지 해제는 suspended_until이 지나야 하고, 이 플래그는 배정 재개 조건 중 하나다. */
+    public void completeEthicsTraining() {
+        this.ethicsTrainingRequired = false;
+    }
+
     // ---- 자격 심사 (CRD-04, ADM-03). 상태 전이 규칙은 UserService에서 확인한다
 
     /** 자격 서류를 (다시) 제출하면 심사 대기로. */

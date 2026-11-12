@@ -3,6 +3,7 @@ package com.mindcare.domain.notification.service;
 import com.mindcare.domain.notification.dto.NotificationPageResponse;
 import com.mindcare.domain.notification.dto.NotificationResponse;
 import com.mindcare.domain.notification.entity.Notification;
+import com.mindcare.domain.notification.push.NotificationCreatedEvent;
 import com.mindcare.domain.notification.repository.NotificationRepository;
 import com.mindcare.global.auth.AuthUser;
 import com.mindcare.global.error.AppException;
@@ -14,13 +15,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * TRD 17-3: 다른 도메인은 notify() 한 번 호출로 알림을 보낸다.
- * 지금은 인앱 알림(notifications 행)만 저장한다. 실시간(STOMP notification:new)·푸시(FCM)는 여기에 붙인다.
+ * ① notifications 행 저장(호출한 트랜잭션 안) ② 커밋 후 FCM 푸시(PushDispatcher, 토큰 있을 때).
+ * 실시간(STOMP notification:new)은 STOMP 인증이 생기면 여기에 붙인다.
  * 호출한 쪽 트랜잭션에 같이 묶여서, 본 작업이 롤백되면 알림도 안 남는다.
  *
  * 조회(NTF-01~03)는 모든 역할·상태가 쓴다 (정지·심사 중에도 심사 결과·제재 알림을 봐야 함).
@@ -34,11 +37,17 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final CursorCodec cursorCodec;
+    private final ApplicationEventPublisher events;
 
+    /**
+     * 알림 저장 + (커밋 후) 그 사용자 기기로 푸시.
+     * title·body는 푸시로 잠금 화면에도 보이므로 상담 내용·위험 수준 같은 민감정보를 넣지 않는다 (TRD 17-3).
+     */
     @Transactional
     public void notify(UUID userId, String type, String title, String body, String link,
             Map<String, Object> payload) {
-        notificationRepository.save(Notification.of(userId, type, title, body, link, payload));
+        Notification saved = notificationRepository.save(Notification.of(userId, type, title, body, link, payload));
+        events.publishEvent(new NotificationCreatedEvent(saved.getId(), userId, type, title, body, link));
     }
 
     @Transactional

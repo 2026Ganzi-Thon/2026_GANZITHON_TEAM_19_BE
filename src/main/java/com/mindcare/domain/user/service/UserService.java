@@ -4,12 +4,14 @@ import com.mindcare.domain.user.entity.User;
 import com.mindcare.domain.user.entity.UserRole;
 import com.mindcare.domain.user.entity.UserStatus;
 import com.mindcare.domain.user.repository.UserRepository;
+import com.mindcare.global.auth.AuthUser;
 import com.mindcare.global.error.AppException;
 import com.mindcare.global.error.ErrorCode;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +31,42 @@ public class UserService {
     public User getById(UUID id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND));
+    }
+
+    /** USR-02. 가입과 같은 닉네임 규칙, 남과 겹치면 409. 정지·심사 중에도 바꿀 수 있다 (탈퇴 계정은 불가). */
+    @Transactional
+    public User changeNickname(AuthUser auth, String requested) {
+        if (auth.status() == UserStatus.WITHDRAWN) {
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+        String nickname = NamePolicy.nickname(requested);
+        User user = getById(auth.id());
+        if (nickname.equals(user.getNickname())) {
+            return user;
+        }
+        if (userRepository.existsByNickname(nickname)) {
+            throw new AppException(ErrorCode.NICKNAME_TAKEN);
+        }
+        user.changeNickname(nickname);
+        try {
+            userRepository.flush();
+        } catch (DataIntegrityViolationException e) {
+            // 같은 닉네임을 동시에 고른 경우 (unique 제약)
+            throw new AppException(ErrorCode.NICKNAME_TAKEN);
+        }
+        return user;
+    }
+
+    /** USR-07. 수련생만, 정지 중에도 가능 (TRD: trainee+suspended). 이미 완료했으면 그대로. */
+    @Transactional
+    public void completeEthicsTraining(AuthUser auth) {
+        if (auth.role() != UserRole.TRAINEE) {
+            throw new AppException(ErrorCode.FORBIDDEN_ROLE);
+        }
+        if (auth.status() != UserStatus.SUSPENDED) {
+            auth.requireActive();
+        }
+        getById(auth.id()).completeEthicsTraining();
     }
 
     /** 알림 받을 어드민 전원 (CRD-04 제출 알림 등). */
