@@ -33,6 +33,10 @@ services:
       APP_HMAC_KEY: ${APP_HMAC_KEY}
       CORS_ORIGINS: ${CORS_ORIGINS}
       FIREBASE_CREDENTIALS_PATH: /run/secrets/firebase.json
+      # 자격 서류 등 파일 저장. 인증은 EC2 인스턴스 역할 (컨테이너에서 IMDS 쓰려면 홉 제한 2 필요)
+      STORAGE_TYPE: s3
+      S3_BUCKET: mindcare-prod-uploads-team19
+      AWS_REGION: ap-northeast-2
       # t3.small(2GB)에서 DB·Redis·Caddy와 같이 돌리므로 힙을 메모리의 40%로 제한
       JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=40
     volumes:
