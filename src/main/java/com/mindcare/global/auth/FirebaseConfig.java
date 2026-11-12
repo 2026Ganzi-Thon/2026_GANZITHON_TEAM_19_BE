@@ -60,6 +60,25 @@ public class FirebaseConfig {
         };
     }
 
+    @Bean
+    public AuthAccounts authAccounts(@Value("${app.firebase.credentials-path}") String credentialsPath)
+            throws IOException {
+        if (!StringUtils.hasText(credentialsPath)) {
+            return new AuthAccounts() {
+                @Override
+                public String ensure(String uid, String email, String password, String displayName) {
+                    return uid;
+                }
+
+                @Override
+                public boolean isReal() {
+                    return false;
+                }
+            };
+        }
+        return new FirebaseAuthAccounts(FirebaseAuth.getInstance(firebaseApp(credentialsPath)));
+    }
+
     private FirebaseApp firebaseApp(String credentialsPath) throws IOException {
         if (!FirebaseApp.getApps().isEmpty()) {
             return FirebaseApp.getInstance();
