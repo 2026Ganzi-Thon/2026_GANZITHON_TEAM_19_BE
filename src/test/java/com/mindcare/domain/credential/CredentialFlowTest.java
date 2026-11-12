@@ -98,7 +98,7 @@ class CredentialFlowTest {
                 .andExpect(jsonPath("$.decided_count").value(1))
                 .andExpect(jsonPath("$.user_status").value("active"));
         em.flush();
-        assertThat(count("select count(*) from notifications where user_id = ? and type = 'credential_approved'",
+        assertThat(count("select count(*) from notifications where user_id = ? and type = 'credential_decided'",
                 trainee)).isEqualTo(1);
         assertThat(jdbc.queryForObject("select status from users where id = ?", String.class, trainee.getId()))
                 .isEqualTo("active");
