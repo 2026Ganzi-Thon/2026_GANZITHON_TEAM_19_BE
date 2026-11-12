@@ -42,3 +42,11 @@
 {"text": "죽\u200b고 싶어요", "level": "high", "hits": ["suicidal_ideation"]}
 {"text": "죽고 싶을 😭😭😭😭 정도는 아니에요", "level": "medium", "hits": ["suicidal_ideation"]}
 {"text": "죽고      싶어요", "level": "none", "hits": []}
+{"text": "지난주에 자살 시도를 했어요", "level": "high", "hits": ["suicidal_ideation"]}
+{"text": "목숨을 끊고 싶어요", "level": "high", "hits": ["suicidal_ideation"]}
+{"text": "제가 죽어야 끝날 것 같아요", "level": "high", "hits": ["suicidal_ideation"]}
+{"text": "오늘 밤 죽으려고요", "level": "critical", "hits": ["imminent_suicide"]}
+{"text": "지금 죽고 싶어요", "level": "critical", "hits": ["imminent_suicide", "suicidal_ideation"]}
+{"text": "오늘 죽는 줄 알았어요", "level": "none", "hits": []}
+{"text": "나를 해치고 싶어요", "level": "high", "hits": ["self_harm", "harm_to_others"]}
+{"text": "해치고 싶다는 건 아니고요, 그냥 다 내려놓고 쉬고 싶다는 뜻이에요.", "level": "medium", "hits": ["harm_to_others"]}
