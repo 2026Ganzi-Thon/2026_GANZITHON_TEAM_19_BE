@@ -85,15 +85,16 @@ public class AdminCredentialService {
                     Map.of("fields", List.of(Map.of("field", "reason", "reason", "required_for_reject"))));
         }
 
+        User provider = userService.getById(userId);
         int decided = credentialService.decideSubmitted(userId, admin.id(), approve, reason);
         UserStatus status = userService.decideReview(userId, approve);
-        if (approve) {
-            notificationService.notify(userId, "credential_approved", "자격 심사가 승인되었어요",
-                    "이제 상담 가능 시간을 등록하면 매칭에 노출됩니다.", "/provider/slots", Map.of());
-        } else {
-            notificationService.notify(userId, "credential_rejected", "자격 심사가 반려되었어요",
-                    "사유: " + reason, "/provider/credentials", Map.of("reason", reason));
-        }
+        // TRD 17-3: type credential_decided, 제목 "심사 결과가 나왔어요", 링크는 상담사 대시보드 (수련생 /t, 전문가 /e)
+        String dashboard = provider.getRole() == UserRole.TRAINEE ? "/t" : "/e";
+        notificationService.notify(userId, "credential_decided", "심사 결과가 나왔어요",
+                approve ? "자격 심사가 승인되었어요. 상담 가능 시간을 등록하면 매칭에 노출됩니다."
+                        : "자격 심사가 반려되었어요. 사유를 확인하고 다시 제출해 주세요.",
+                dashboard,
+                approve ? Map.of("decision", "approve") : Map.of("decision", "reject", "reason", reason));
         auditLogService.record(admin.id(), approve ? "approve_credential" : "reject_credential", "user", userId,
                 reason);
         return new CredentialDecisionResponse(userId, decided, status);
