@@ -63,3 +63,8 @@ app:
   cors:
     # TRD 6-5: Firebase 도메인 + 로컬 프론트만 허용 (콤마 구분)
     allowed-origins: ${CORS_ORIGINS:http://localhost:5173}
+  storage:
+    # s3 = 운영 (EC2 역할로 인증), memory = 로컬·테스트 (실제 업로드 없음)
+    type: ${STORAGE_TYPE:memory}
+    bucket: ${S3_BUCKET:}
+    region: ${AWS_REGION:ap-northeast-2}

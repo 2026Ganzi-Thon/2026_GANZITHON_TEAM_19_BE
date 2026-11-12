@@ -30,6 +30,11 @@ dependencies {
     runtimeOnly 'org.postgresql:postgresql'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1'
     implementation 'com.google.firebase:firebase-admin:9.11.0'
+    // S3 (자격 서류 등 파일 저장). EC2 IAM 역할로 인증하므로 키 설정 없음. 비동기 클라이언트(netty)는 안 써서 뺀다
+    implementation platform('software.amazon.awssdk:bom:2.29.0')
+    implementation('software.amazon.awssdk:s3') {
+        exclude group: 'software.amazon.awssdk', module: 'netty-nio-client'
+    }
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
