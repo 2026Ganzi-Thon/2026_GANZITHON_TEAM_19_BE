@@ -104,16 +104,20 @@ class LLMGateway:
     async def embed(self, texts: list[str], *, timeout: float) -> list[list[float]]:
         """임베딩. 실패하면 오류를 돌려주고, 폴백은 백엔드가 한다 (TRD 16-1 AI-02)."""
 
-        async def call(_deadline: float, _spend: _Spend) -> list[list[float]]:
+        async def call(_deadline: float, spend: _Spend) -> list[list[float]]:
             try:
                 vectors = await self.llm.embed(texts)
             except LLMError as exc:
                 raise to_ai_error(exc) from None
             if len(vectors) != len(texts):
                 raise errors.output_invalid()
+            # embed()는 벡터만 돌려주므로 토큰 수를 글자 수로 어림해 일일 상한에 넣는다.
+            spend.tokens += sum(len(text) for text in texts)
             return vectors
 
-        return await self._guarded(call, timeout, "general")
+        # 차선은 LLM 호출 몫이다 (TRD 16-11). 임베딩까지 넣으면 60~90초짜리 리포트가
+        # 차선을 채운 동안 3초짜리 매칭이 전부 시간 초과로 끝난다.
+        return await self._guarded(call, timeout, None)
 
     async def _run[T: BaseModel](
         self,
@@ -132,9 +136,12 @@ class LLMGateway:
         self,
         call: Callable[[float, _Spend], Awaitable[R]],
         timeout: float,
-        lane: Lane,
+        lane: Lane | None,
     ) -> R:
-        """일일 상한·서킷·차선·제한 시간을 건 채로 call을 한 번 실행한다."""
+        """일일 상한·서킷·차선·제한 시간을 건 채로 call을 한 번 실행한다.
+
+        lane이 None이면 차선을 쓰지 않는다.
+        """
         if await self.budget.exhausted():
             raise errors.budget_exceeded()
         permit = self._breaker.allow()
@@ -142,18 +149,23 @@ class LLMGateway:
             raise errors.unavailable()
 
         deadline = self._clock() + timeout
-        semaphore = self._limits.lane(lane)
+        semaphore = self._limits.lane(lane) if lane is not None else None
         outcome: bool | None = None  # None이면 서킷 통계에 넣지 않는다
         acquired = False
         spend = _Spend()
         try:
-            try:
-                async with asyncio.timeout(timeout):
-                    await semaphore.acquire()
-                    acquired = True
-            except TimeoutError:
-                # 우리 쪽 대기열에서 보낸 시간이다. 공급사 장애로 세지 않는다.
-                raise errors.timeout() from None
+            if semaphore is not None:
+                try:
+                    async with asyncio.timeout(timeout):
+                        await semaphore.acquire()
+                        acquired = True
+                except TimeoutError:
+                    # 우리 쪽 대기열에서 보낸 시간이다. 공급사 장애로 세지 않는다.
+                    raise errors.timeout() from None
+                if deadline - self._clock() < min(MIN_ATTEMPT_SECONDS, timeout / 2):
+                    # 차선을 기다리느라 시간을 거의 다 썼다. 지금 불러 봐야 시간 초과가
+                    # 되고 그것이 공급사 장애로 세어지므로, 부르지 않고 끝낸다.
+                    raise errors.timeout()
             try:
                 async with asyncio.timeout(max(deadline - self._clock(), 0.0)):
                     result = await call(deadline, spend)
@@ -172,7 +184,7 @@ class LLMGateway:
             return result
         finally:
             # 취소를 포함해 어떤 경로로 끝나도 자리와 허가증을 돌려준다.
-            if acquired:
+            if acquired and semaphore is not None:
                 semaphore.release()
             self._breaker.record(permit, outcome)
             if spend.tokens:

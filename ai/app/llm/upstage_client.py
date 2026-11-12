@@ -29,6 +29,7 @@ EMBEDDING_MODEL = "solar-embedding-2-query"
 EMBED_BATCH_SIZE = 100  # 요청 하나에 문자열 100개까지
 TEMPERATURE = 0.1  # TRD 16-4: 온도 0~0.2
 QUOTA_EXHAUSTED_CODE = "usage_limit_exceeded"
+REQUEST_TIMEOUT_STATUS = 408
 # 추론은 켜지 않는다 (reasoning_effort를 보내지 않으면 꺼진다). 추론 토큰이 출력 토큰에
 # 들어가므로, 켜면 TRD 16-9의 출력 상한 안에서 답이 잘릴 수 있다.
 
@@ -93,7 +94,8 @@ def _map_error(exc: openai.OpenAIError) -> LLMError:
     if isinstance(exc, openai.APIConnectionError):
         return LLMProviderError("connection error")
     if isinstance(exc, openai.APIStatusError):
-        return LLMProviderError(f"status {exc.status_code}", retryable=exc.status_code >= 500)
+        retryable = exc.status_code >= 500 or exc.status_code == REQUEST_TIMEOUT_STATUS
+        return LLMProviderError(f"status {exc.status_code}", retryable=retryable)
     return LLMProviderError(type(exc).__name__, retryable=False)
 
 
@@ -163,7 +165,9 @@ class UpstageLLMClient:
         try:
             for start in range(0, len(texts), EMBED_BATCH_SIZE):
                 batch = texts[start : start + EMBED_BATCH_SIZE]
-                response = await self._chat.embeddings.create(model=EMBEDDING_MODEL, input=batch)
+                response = await self._chat.embeddings.create(
+                    model=EMBEDDING_MODEL, input=batch, encoding_format="float"
+                )
                 ordered = sorted(response.data, key=lambda item: item.index)
                 vectors.extend(item.embedding for item in ordered)
         except openai.OpenAIError as exc:

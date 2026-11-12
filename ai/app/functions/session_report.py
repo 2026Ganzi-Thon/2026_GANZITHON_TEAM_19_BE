@@ -12,7 +12,7 @@ from app.functions.masking import Numbering
 from app.functions.report_common import SafetyTracker, build_client_summary
 from app.functions.risk import masked_evidence
 from app.meta import build_meta
-from app.safety.evidence import locate_quote, verbatim_quotes
+from app.safety.evidence import QuoteIndex
 from app.schemas import (
     MAX_KEY_QUOTES,
     Digest,
@@ -34,6 +34,8 @@ HEAD_SUMMARY_TOKENS = 2_000
 MARKER_TOKENS = 100  # 요약 블록의 머리말·꼬리말 몫
 CHARS_PER_TOKEN = 1.5  # 한국어 기준 대략값
 HEAD_UTTERANCE_CHARS = 80
+MAX_DISTORTION_ITEMS = 10  # LLM이 돌려준 목록에서 검증해 볼 개수
+MAX_QUOTE_CANDIDATES = 12
 ROLE_LABELS = {"client": "내담자", "provider": "상담자"}
 
 
@@ -126,13 +128,14 @@ async def generate_session_report(
 
     # 근거 인용은 내담자 발화에 실제로 있는 문장만 남기고, 글자는 원문 쪽 것을 쓴다.
     # 상담자 발화는 내담자 인용이 될 수 없다.
+    quotes = QuoteIndex(client_texts)
     located = [
-        (d.name, locate_quote(d.evidence, client_texts))
-        for d in draft.distortions
+        (d.name, quotes.locate(d.evidence))
+        for d in draft.distortions[:MAX_DISTORTION_ITEMS]
         if d.name in services.dictionary.distortions
     ]
     distortions = [DistortionItem(name=name, evidence=found[1]) for name, found in located if found]
-    key_quotes = verbatim_quotes(draft.digest.key_quotes, client_texts, MAX_KEY_QUOTES)
+    key_quotes = quotes.verbatim(draft.digest.key_quotes[:MAX_QUOTE_CANDIDATES], MAX_KEY_QUOTES)
 
     # 위험 수준은 규칙 엔진 결과보다 낮아질 수 없다. 규칙 판정은 백엔드 엔진과 결과가
     # 같도록 원문으로 하고, 내보내는 근거 문장만 대화와 같은 번호로 가린다.

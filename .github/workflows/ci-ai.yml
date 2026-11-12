@@ -4,6 +4,8 @@ name: AI Server CI
 on:
   pull_request:
     branches: [develop, main]
+    # labeled·unlabeled: ai-breaking 라벨을 붙이거나 떼면 다시 검사한다 (5번 단계)
+    types: [opened, synchronize, reopened, labeled, unlabeled]
     paths:
       - "ai/**"
 

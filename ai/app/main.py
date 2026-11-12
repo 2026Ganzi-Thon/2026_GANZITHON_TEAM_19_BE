@@ -43,6 +43,7 @@ def create_app(services: Services | None = None) -> FastAPI:
         lifespan=lifespan,
         docs_url=None,
         redoc_url=None,
+        openapi_url=None,  # 계약은 ai/openapi.json 파일로만 공유한다
     )
     # 나중에 더한 미들웨어가 바깥에서 돈다. request_context가 가장 바깥이라
     # 413을 포함한 모든 응답에 요청 ID와 X-AI-Budget-Used가 붙는다 (TRD 16-11).

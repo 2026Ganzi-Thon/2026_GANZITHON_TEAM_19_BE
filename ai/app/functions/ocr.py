@@ -2,11 +2,12 @@
 
 import re
 import time
-from datetime import date
+from datetime import date, datetime
 from typing import TYPE_CHECKING
 
 from app import errors
 from app.functions.drafts import OcrDraft
+from app.llm.budget import KST
 from app.llm.client import sniff_media_type
 from app.meta import build_meta
 from app.schemas import OcrResponse
@@ -29,7 +30,7 @@ def parse_date(value: str | None) -> date | None:
         parsed = date(int(match[1]), int(match[2]), int(match[3]))
     except ValueError:
         return None
-    return parsed if parsed <= date.today() else None
+    return parsed if parsed <= datetime.now(KST).date() else None  # 미래 날짜는 버린다
 
 
 def _clean(value: str | None) -> str | None:
@@ -63,9 +64,10 @@ async def read_certificate(data: bytes, services: "Services") -> OcrResponse:
         "issued_on": parse_date(draft.issued_on),
         "issuer": _clean(draft.issuer),
     }
-    # 추출 API가 신뢰도를 주지 않으면, 형식 검사를 통과한 필드의 비율로 대신한다.
+    # 신뢰도는 형식 검사를 통과한 필드의 비율을 넘지 못한다. 추출 API가 값을 주지
+    # 않으면 그 비율을 쓴다. 아무것도 못 읽었는데 높게 나오는 일을 막는다.
     filled = sum(value is not None for value in fields.values()) / len(fields)
-    confidence = draft.confidence if draft.confidence is not None else filled
+    confidence = filled if draft.confidence is None else min(draft.confidence, filled)
     return OcrResponse(
         **fields,
         confidence=round(min(max(confidence, 0.0), 1.0), 3),

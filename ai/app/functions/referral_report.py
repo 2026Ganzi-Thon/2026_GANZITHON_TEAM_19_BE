@@ -132,6 +132,7 @@ def _distortions(
     ordered = sorted(entries.items())
     quotes = [(no, quote) for no, entry in ordered for quote in entry.digest.key_quotes]
     by_canonical = {canonical_quote(quote): (no, quote) for no, quote in reversed(quotes)}
+    by_canonical.pop("", None)  # 빈 인용은 근거가 될 수 없다
     kept: list[ReferralDistortion] = []
     for item in draft.distortions:
         found = by_canonical.get(canonical_quote(item.evidence))
