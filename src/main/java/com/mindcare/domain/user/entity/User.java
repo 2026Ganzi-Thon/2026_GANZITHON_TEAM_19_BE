@@ -74,4 +74,19 @@ public class User {
         this.trainingDataOptIn = trainingDataOptIn;
         this.marketingOptIn = marketingOptIn;
     }
+
+    // ---- 자격 심사 (CRD-04, ADM-03). 상태 전이 규칙은 UserService에서 확인한다
+
+    /** 자격 서류를 (다시) 제출하면 심사 대기로. */
+    public void markPendingReview() {
+        this.status = UserStatus.PENDING_REVIEW;
+    }
+
+    public void approveReview() {
+        this.status = UserStatus.ACTIVE;
+    }
+
+    public void rejectReview() {
+        this.status = UserStatus.REJECTED;
+    }
 }

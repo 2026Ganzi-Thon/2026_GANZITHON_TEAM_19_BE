@@ -39,6 +39,11 @@ public class ProviderProfileService {
         return profileRepository.existsById(userId);
     }
 
+    /** 자격 진위 확인용 실명 (CRD-02). 프로필이 없으면 비어 있다. */
+    public Optional<String> findRealName(UUID userId) {
+        return profileRepository.findById(userId).map(profile -> codec.decrypt(profile.getRealNameEnc()));
+    }
+
     /** USR-01의 provider_profile. 내담자·프로필 미작성이면 비어 있다. */
     public Optional<ProviderProfileResponse> findMine(UUID userId) {
         return profileRepository.findById(userId).map(this::toMine);
