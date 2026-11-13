@@ -1,0 +1,50 @@
+{"category": "career", "text": "면접을 볼 때마다 떨어져서 다음 면접이 두려워요", "emotions": ["불안", "두려움", "좌절"]}
+{"category": "career", "text": "졸업하고 1년째 취업을 못 해서 마음이 조급해요", "emotions": ["초조", "불안"]}
+{"category": "career", "text": "하고 싶은 일이 뭔지 모르겠고 아무것도 하기 싫어요", "emotions": ["무기력", "허무"]}
+{"category": "career", "text": "친구들은 다 취업했는데 저만 뒤처진 것 같아 창피해요", "emotions": ["수치심", "좌절", "불안"]}
+{"category": "career", "text": "공무원 시험에 세 번 떨어지고 나니 다 소용없다는 생각이 들어요", "emotions": ["좌절", "허무", "무기력"]}
+{"category": "career", "text": "전공이 안 맞는데 바꾸기엔 늦은 것 같아 막막해요", "emotions": ["불안", "좌절"]}
+{"category": "career", "text": "자기소개서를 쓰려고 앉으면 손이 안 움직여요", "emotions": ["무기력", "불안"]}
+{"category": "career", "text": "부모님께 손 벌리는 게 미안해서 얼굴을 못 보겠어요", "emotions": ["죄책감", "수치심"]}
+{"category": "burnout", "text": "야근이 석 달째 이어지니 아무 감정이 안 느껴져요", "emotions": ["무기력", "허무"]}
+{"category": "burnout", "text": "출근길에 심장이 뛰고 손에 땀이 나요", "emotions": ["불안", "두려움"]}
+{"category": "burnout", "text": "일을 해도 해도 끝이 없어서 지쳤어요", "emotions": ["무기력", "좌절"]}
+{"category": "burnout", "text": "상사가 제 보고서를 사람들 앞에서 찢었어요. 너무 화가 나요", "emotions": ["분노", "수치심"]}
+{"category": "burnout", "text": "성과를 못 내면 잘릴까 봐 주말에도 일해요", "emotions": ["불안", "초조", "두려움"]}
+{"category": "burnout", "text": "열심히 해 봤자 달라지는 게 없다는 생각이 들어요", "emotions": ["허무", "무기력", "좌절"]}
+{"category": "burnout", "text": "동료가 제 공을 가로채서 억울하고 화가 나요", "emotions": ["분노"]}
+{"category": "burnout", "text": "쉬는 날에도 일 생각에 마음이 안 놓여요", "emotions": ["불안", "초조"]}
+{"category": "relationship", "text": "단체 대화방에서 저만 답을 못 받으면 하루 종일 신경 쓰여요", "emotions": ["불안", "외로움"]}
+{"category": "relationship", "text": "친한 친구가 제 뒷말을 했다는 걸 알고 배신감이 들어요", "emotions": ["분노", "슬픔"]}
+{"category": "relationship", "text": "사람들 앞에서 말하려면 얼굴이 빨개지고 떨려요", "emotions": ["불안", "수치심", "두려움"]}
+{"category": "relationship", "text": "주말에 연락 오는 사람이 아무도 없어요", "emotions": ["외로움", "슬픔"]}
+{"category": "relationship", "text": "거절을 못 해서 부탁을 다 들어주다 보니 지쳤어요", "emotions": ["무기력", "좌절"]}
+{"category": "relationship", "text": "제가 한 말 때문에 친구가 상처받은 것 같아 계속 마음에 걸려요", "emotions": ["죄책감", "불안"]}
+{"category": "relationship", "text": "새 모임에 가면 다들 저를 이상하게 볼 것 같아요", "emotions": ["불안", "두려움"]}
+{"category": "relationship", "text": "룸메이트가 제 물건을 마음대로 써서 짜증이 나요", "emotions": ["분노"]}
+{"category": "romance", "text": "헤어진 지 한 달인데 아직도 밤마다 눈물이 나요", "emotions": ["슬픔", "외로움"]}
+{"category": "romance", "text": "남자친구가 답장이 늦으면 버림받을 것 같아 불안해요", "emotions": ["불안", "두려움"]}
+{"category": "romance", "text": "바람피운 걸 알고도 못 헤어지는 제가 한심해요", "emotions": ["수치심", "분노", "좌절"]}
+{"category": "romance", "text": "연애를 시작하면 늘 제가 먼저 지쳐서 끝내요", "emotions": ["무기력", "허무"]}
+{"category": "romance", "text": "제가 더 잘했으면 안 헤어졌을 거라는 생각이 들어요", "emotions": ["죄책감", "슬픔"]}
+{"category": "romance", "text": "결혼 얘기가 나오니 숨이 막히고 도망가고 싶어요", "emotions": ["불안", "두려움"]}
+{"category": "romance", "text": "오래 만난 사람과 헤어지고 나니 텅 빈 느낌이에요", "emotions": ["허무", "외로움", "슬픔"]}
+{"category": "romance", "text": "여자친구가 제 친구 관계까지 간섭해서 화가 나요", "emotions": ["분노"]}
+{"category": "family", "text": "엄마가 매일 다른 집 자식과 비교해서 속상해요", "emotions": ["슬픔", "분노", "좌절"]}
+{"category": "family", "text": "아버지가 돌아가신 뒤로 집이 너무 조용해요", "emotions": ["슬픔", "외로움"]}
+{"category": "family", "text": "부모님이 싸울 때마다 제 탓인 것 같아요", "emotions": ["죄책감", "불안"]}
+{"category": "family", "text": "동생만 예뻐하는 부모님을 보면 화가 치밀어요", "emotions": ["분노", "외로움"]}
+{"category": "family", "text": "편찮으신 어머니를 두고 독립한 게 마음에 걸려요", "emotions": ["죄책감"]}
+{"category": "family", "text": "명절에 친척들 질문을 받을 생각에 벌써 겁나요", "emotions": ["불안", "두려움"]}
+{"category": "family", "text": "집에 있으면 숨을 곳이 없다는 느낌이 들어요", "emotions": ["불안", "외로움"]}
+{"category": "family", "text": "부모님 기대를 채우지 못해서 죄송한 마음뿐이에요", "emotions": ["죄책감", "수치심"]}
+{"category": "self", "text": "거울을 보면 제가 너무 못나 보여서 밖에 나가기 싫어요", "emotions": ["수치심", "우울"]}
+{"category": "self", "text": "뭘 해도 남들보다 못하는 것 같아요", "emotions": ["좌절", "우울", "수치심"]}
+{"category": "self", "text": "칭찬을 들어도 진심이 아닐 거라는 생각이 들어요", "emotions": ["불안", "우울"]}
+{"category": "self", "text": "하루 종일 누워만 있고 씻는 것도 귀찮아요", "emotions": ["무기력", "우울"]}
+{"category": "self", "text": "작은 실수에도 저 자신에게 심하게 화를 내요", "emotions": ["분노", "죄책감"]}
+{"category": "self", "text": "왜 사는지 모르겠고 다 부질없이 느껴져요", "emotions": ["허무", "우울"]}
+{"category": "self", "text": "남들 앞에서 제 의견을 말하는 게 겁나요", "emotions": ["두려움", "불안"]}
+{"category": "self", "text": "예전에 좋아하던 일도 이제는 재미가 없어요", "emotions": ["무기력", "우울", "허무"]}
+{"category": "other", "text": "이사 온 동네에 아는 사람이 하나도 없어요", "emotions": ["외로움"]}
+{"category": "other", "text": "밤낮이 바뀌어서 낮에는 아무것도 못 해요", "emotions": ["무기력", "초조"]}

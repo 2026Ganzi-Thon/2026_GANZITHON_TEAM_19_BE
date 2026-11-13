@@ -1,0 +1,51 @@
+# 1단계 정규식 PII 패턴 (TRD 16-5).
+# AI 서버 마스킹, 백엔드 ContactDetector, 백엔드 폴백 마스킹이 모두 이 파일을 쓴다.
+# 두 엔진은 masking/pattern_cases.jsonl의 결과가 전부 같아야 한다.
+#
+# 규칙:
+#  - 입력을 먼저 정규화한다 (ai/app/text.py, risk_lexicon.yaml 머리말 1번과 같다).
+#    마스킹 결과도 정규화된 글이다 (전각 숫자는 반각이 되고 제로폭 문자는 빠진다).
+#  - 패턴은 Python re / Java regex 공통 문법만 쓴다. \s \d 는 ASCII 기준이다
+#    (Python은 re.ASCII, Java는 기본값). 상한 없는 수량자를 겹쳐 쓰지 않는다.
+#  - 위에서 아래 순서가 우선순위다. 겹치면 먼저 나온 패턴이 이긴다.
+#  - 패턴에 캡처 그룹 1이 있으면 그룹 1만 치환하고, 없으면 일치 전체를 치환한다.
+#  - 같은 값(normalize 적용 후)은 문서 안에서 같은 번호를 받는다. 예: [연락처1]
+#  - normalize: digits = 숫자만 남김, lower = 소문자화
+version: 1
+patterns:
+  - id: url
+    token: 링크
+    normalize: lower
+    pattern: '(?:https?://|www\.)[^\s<>"''\)\]]{1,2000}'
+  - id: email
+    token: 이메일
+    normalize: lower
+    pattern: '(?<![A-Za-z0-9._%+-])[A-Za-z0-9._%+-]+@[A-Za-z0-9-]{1,63}(?:\.[A-Za-z0-9-]{1,63}){0,8}\.[A-Za-z]{2,24}'
+  - id: rrn
+    token: 식별번호
+    normalize: digits
+    pattern: '(?<!\d)\d{6}\s?-\s?[1-4]\d{6}(?!\d)'
+  - id: card
+    token: 식별번호
+    normalize: digits
+    pattern: '(?<!\d)\d{4}[- ]\d{4}[- ]\d{4}[- ]\d{4}(?!\d)'
+  - id: mobile_intl
+    token: 연락처
+    normalize: digits
+    pattern: '\+82[-. ]?1[016789][-. ]?\d{3,4}[-. ]?\d{4}(?!\d)'
+  - id: mobile
+    token: 연락처
+    normalize: digits
+    pattern: '(?<!\d)01[016789][-. ]?\d{3,4}[-. ]?\d{4}(?!\d)'
+  - id: landline
+    token: 연락처
+    normalize: digits
+    pattern: '(?<!\d)0(?:2|[3-6][1-5]|70)[-. ]\d{3,4}[-. ]\d{4}(?!\d)'
+  - id: messenger_id
+    token: 연락처
+    normalize: lower
+    pattern: '(?:카톡|카카오톡|카카오|인스타그램|인스타|텔레그램|라인|디스코드)\s{0,3}(?:아이디|ID|id|Id)?\s{0,3}(?:는|은|가|이)?\s{0,3}:?\s{0,3}([A-Za-z0-9_.]{4,30})'
+  - id: sns_handle
+    token: 연락처
+    normalize: lower
+    pattern: '(?<![A-Za-z0-9._%+-])@[A-Za-z0-9_.]{3,30}'

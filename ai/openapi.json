@@ -1,0 +1,1538 @@
+{
+  "components": {
+    "schemas": {
+      "Body_AI-07": {
+        "properties": {
+          "file": {
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file"
+        ],
+        "title": "Body_AI-07",
+        "type": "object"
+      },
+      "Candidate": {
+        "properties": {
+          "id": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "maxLength": 50,
+              "type": "string"
+            },
+            "maxItems": 30,
+            "title": "Tags",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "Candidate",
+        "type": "object"
+      },
+      "ClientSummary": {
+        "properties": {
+          "chief_complaint": {
+            "title": "Chief Complaint",
+            "type": "string"
+          },
+          "coping": {
+            "title": "Coping",
+            "type": "string"
+          },
+          "safety_check": {
+            "title": "Safety Check",
+            "type": "string"
+          },
+          "thinking_patterns": {
+            "title": "Thinking Patterns",
+            "type": "string"
+          },
+          "triggers": {
+            "title": "Triggers",
+            "type": "string"
+          }
+        },
+        "required": [
+          "chief_complaint",
+          "thinking_patterns",
+          "triggers",
+          "coping",
+          "safety_check"
+        ],
+        "title": "ClientSummary",
+        "type": "object"
+      },
+      "Digest": {
+        "properties": {
+          "issues": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Issues",
+            "type": "array"
+          },
+          "key_quotes": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 6,
+            "title": "Key Quotes",
+            "type": "array"
+          },
+          "mood_shift": {
+            "default": "",
+            "title": "Mood Shift",
+            "type": "string"
+          },
+          "risk_level": {
+            "default": "none",
+            "enum": [
+              "none",
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ],
+            "title": "Risk Level",
+            "type": "string"
+          },
+          "trainee_interventions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Trainee Interventions",
+            "type": "array"
+          }
+        },
+        "title": "Digest",
+        "type": "object"
+      },
+      "DigestEntry": {
+        "properties": {
+          "digest": {
+            "$ref": "#/components/schemas/Digest"
+          },
+          "session_date": {
+            "format": "date",
+            "title": "Session Date",
+            "type": "string"
+          },
+          "session_no": {
+            "minimum": 1.0,
+            "title": "Session No",
+            "type": "integer"
+          },
+          "trainee_label": {
+            "enum": [
+              "수련생 A",
+              "수련생 B"
+            ],
+            "title": "Trainee Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_no",
+          "session_date",
+          "trainee_label",
+          "digest"
+        ],
+        "title": "DigestEntry",
+        "type": "object"
+      },
+      "DistortionItem": {
+        "properties": {
+          "evidence": {
+            "title": "Evidence",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "evidence"
+        ],
+        "title": "DistortionItem",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "Intake": {
+        "properties": {
+          "category": {
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Category",
+            "type": "string"
+          },
+          "tags": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/IntakeTags"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "text": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          }
+        },
+        "required": [
+          "category"
+        ],
+        "title": "Intake",
+        "type": "object"
+      },
+      "IntakeTags": {
+        "properties": {
+          "distortions": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 3,
+            "title": "Distortions",
+            "type": "array"
+          },
+          "emotions": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 5,
+            "title": "Emotions",
+            "type": "array"
+          },
+          "keywords": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 8,
+            "title": "Keywords",
+            "type": "array"
+          }
+        },
+        "title": "IntakeTags",
+        "type": "object"
+      },
+      "IntakeTagsResponse": {
+        "properties": {
+          "distortions": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 3,
+            "title": "Distortions",
+            "type": "array"
+          },
+          "emotions": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 5,
+            "title": "Emotions",
+            "type": "array"
+          },
+          "keywords": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 8,
+            "title": "Keywords",
+            "type": "array"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "meta"
+        ],
+        "title": "IntakeTagsResponse",
+        "type": "object"
+      },
+      "MaskRequest": {
+        "properties": {
+          "text": {
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "MaskRequest",
+        "type": "object"
+      },
+      "MaskResponse": {
+        "properties": {
+          "entities": {
+            "items": {
+              "$ref": "#/components/schemas/MaskedEntity"
+            },
+            "title": "Entities",
+            "type": "array"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "partial": {
+            "default": false,
+            "title": "Partial",
+            "type": "boolean"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "entities",
+          "meta"
+        ],
+        "title": "MaskResponse",
+        "type": "object"
+      },
+      "MaskedEntity": {
+        "properties": {
+          "token": {
+            "title": "Token",
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "연락처",
+              "이메일",
+              "식별번호",
+              "링크",
+              "이름",
+              "지명",
+              "직장",
+              "학교"
+            ],
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "token"
+        ],
+        "title": "MaskedEntity",
+        "type": "object"
+      },
+      "Meta": {
+        "properties": {
+          "cache_hit": {
+            "default": false,
+            "title": "Cache Hit",
+            "type": "boolean"
+          },
+          "fallback": {
+            "default": false,
+            "title": "Fallback",
+            "type": "boolean"
+          },
+          "latency_ms": {
+            "default": 0,
+            "title": "Latency Ms",
+            "type": "integer"
+          },
+          "model": {
+            "title": "Model",
+            "type": "string"
+          },
+          "prompt_version": {
+            "title": "Prompt Version",
+            "type": "string"
+          },
+          "provider": {
+            "title": "Provider",
+            "type": "string"
+          },
+          "safety_filtered": {
+            "default": false,
+            "title": "Safety Filtered",
+            "type": "boolean"
+          },
+          "tokens_in": {
+            "default": 0,
+            "title": "Tokens In",
+            "type": "integer"
+          },
+          "tokens_out": {
+            "default": 0,
+            "title": "Tokens Out",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "provider",
+          "model",
+          "prompt_version"
+        ],
+        "title": "Meta",
+        "type": "object"
+      },
+      "OcrResponse": {
+        "properties": {
+          "cert_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cert Name"
+          },
+          "cert_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cert Number"
+          },
+          "confidence": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence",
+            "type": "number"
+          },
+          "issued_on": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Issued On"
+          },
+          "issuer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Issuer"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          }
+        },
+        "required": [
+          "confidence",
+          "meta"
+        ],
+        "title": "OcrResponse",
+        "type": "object"
+      },
+      "RedFlag": {
+        "properties": {
+          "evidence": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence"
+          },
+          "level": {
+            "enum": [
+              "none",
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ],
+            "title": "Level",
+            "type": "string"
+          }
+        },
+        "required": [
+          "level"
+        ],
+        "title": "RedFlag",
+        "type": "object"
+      },
+      "ReferralClientSummary": {
+        "description": "내담자용 쉬운 말 버전. 연계 리포트는 회기별 한 줄을 포함한다.",
+        "properties": {
+          "chief_complaint": {
+            "title": "Chief Complaint",
+            "type": "string"
+          },
+          "coping": {
+            "title": "Coping",
+            "type": "string"
+          },
+          "safety_check": {
+            "title": "Safety Check",
+            "type": "string"
+          },
+          "sessions": {
+            "items": {
+              "$ref": "#/components/schemas/SessionLine"
+            },
+            "title": "Sessions",
+            "type": "array"
+          },
+          "thinking_patterns": {
+            "title": "Thinking Patterns",
+            "type": "string"
+          },
+          "triggers": {
+            "title": "Triggers",
+            "type": "string"
+          }
+        },
+        "required": [
+          "chief_complaint",
+          "thinking_patterns",
+          "triggers",
+          "coping",
+          "safety_check"
+        ],
+        "title": "ReferralClientSummary",
+        "type": "object"
+      },
+      "ReferralDistortion": {
+        "properties": {
+          "evidence": {
+            "title": "Evidence",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "session_no": {
+            "title": "Session No",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "evidence",
+          "session_no"
+        ],
+        "title": "ReferralDistortion",
+        "type": "object"
+      },
+      "ReferralRedFlag": {
+        "properties": {
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/RiskHistoryPoint"
+            },
+            "title": "History",
+            "type": "array"
+          },
+          "max_level": {
+            "enum": [
+              "none",
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ],
+            "title": "Max Level",
+            "type": "string"
+          }
+        },
+        "required": [
+          "max_level",
+          "history"
+        ],
+        "title": "ReferralRedFlag",
+        "type": "object"
+      },
+      "ReferralReportRequest": {
+        "properties": {
+          "digests": {
+            "items": {
+              "$ref": "#/components/schemas/DigestEntry"
+            },
+            "maxItems": 10,
+            "minItems": 1,
+            "title": "Digests",
+            "type": "array"
+          },
+          "intake_summaries": {
+            "items": {
+              "maxLength": 4000,
+              "type": "string"
+            },
+            "title": "Intake Summaries",
+            "type": "array"
+          },
+          "risk_history": {
+            "items": {
+              "$ref": "#/components/schemas/RiskHistoryItem"
+            },
+            "title": "Risk History",
+            "type": "array"
+          }
+        },
+        "required": [
+          "digests"
+        ],
+        "title": "ReferralReportRequest",
+        "type": "object"
+      },
+      "ReferralReportResponse": {
+        "properties": {
+          "chief_complaint": {
+            "title": "Chief Complaint",
+            "type": "string"
+          },
+          "client_summary": {
+            "$ref": "#/components/schemas/ReferralClientSummary"
+          },
+          "defenses": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Defenses",
+            "type": "array"
+          },
+          "distortions": {
+            "items": {
+              "$ref": "#/components/schemas/ReferralDistortion"
+            },
+            "title": "Distortions",
+            "type": "array"
+          },
+          "focus_suggestions": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 3,
+            "title": "Focus Suggestions",
+            "type": "array"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "progress": {
+            "title": "Progress",
+            "type": "string"
+          },
+          "red_flag": {
+            "$ref": "#/components/schemas/ReferralRedFlag"
+          },
+          "timeline": {
+            "items": {
+              "$ref": "#/components/schemas/TimelineItem"
+            },
+            "title": "Timeline",
+            "type": "array"
+          },
+          "triggers": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Triggers",
+            "type": "array"
+          }
+        },
+        "required": [
+          "chief_complaint",
+          "timeline",
+          "distortions",
+          "triggers",
+          "defenses",
+          "progress",
+          "red_flag",
+          "focus_suggestions",
+          "client_summary",
+          "meta"
+        ],
+        "title": "ReferralReportResponse",
+        "type": "object"
+      },
+      "RiskHistoryItem": {
+        "properties": {
+          "evidence": {
+            "anyOf": [
+              {
+                "maxLength": 4000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence"
+          },
+          "level": {
+            "enum": [
+              "none",
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ],
+            "title": "Level",
+            "type": "string"
+          },
+          "session_no": {
+            "minimum": 1.0,
+            "title": "Session No",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "session_no",
+          "level"
+        ],
+        "title": "RiskHistoryItem",
+        "type": "object"
+      },
+      "RiskHistoryPoint": {
+        "properties": {
+          "evidence": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence"
+          },
+          "level": {
+            "enum": [
+              "none",
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ],
+            "title": "Level",
+            "type": "string"
+          },
+          "session_no": {
+            "title": "Session No",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "session_no",
+          "level"
+        ],
+        "title": "RiskHistoryPoint",
+        "type": "object"
+      },
+      "RiskRequest": {
+        "properties": {
+          "context": {
+            "items": {
+              "maxLength": 4000,
+              "type": "string"
+            },
+            "maxItems": 3,
+            "title": "Context",
+            "type": "array"
+          },
+          "text": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          },
+          "use_llm": {
+            "default": true,
+            "title": "Use Llm",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "RiskRequest",
+        "type": "object"
+      },
+      "RiskResponse": {
+        "properties": {
+          "evidence": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence"
+          },
+          "level": {
+            "enum": [
+              "none",
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ],
+            "title": "Level",
+            "type": "string"
+          },
+          "llm_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Llm Score"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "rule_hits": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Rule Hits",
+            "type": "array"
+          }
+        },
+        "required": [
+          "level",
+          "meta"
+        ],
+        "title": "RiskResponse",
+        "type": "object"
+      },
+      "SessionLine": {
+        "properties": {
+          "line": {
+            "title": "Line",
+            "type": "string"
+          },
+          "session_no": {
+            "title": "Session No",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "session_no",
+          "line"
+        ],
+        "title": "SessionLine",
+        "type": "object"
+      },
+      "SessionReportRequest": {
+        "properties": {
+          "intake": {
+            "$ref": "#/components/schemas/Intake"
+          },
+          "transcript": {
+            "items": {
+              "$ref": "#/components/schemas/Utterance"
+            },
+            "minItems": 1,
+            "title": "Transcript",
+            "type": "array"
+          }
+        },
+        "required": [
+          "transcript",
+          "intake"
+        ],
+        "title": "SessionReportRequest",
+        "type": "object"
+      },
+      "SessionReportResponse": {
+        "properties": {
+          "chief_complaint": {
+            "title": "Chief Complaint",
+            "type": "string"
+          },
+          "client_summary": {
+            "$ref": "#/components/schemas/ClientSummary"
+          },
+          "defenses": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Defenses",
+            "type": "array"
+          },
+          "digest": {
+            "$ref": "#/components/schemas/Digest"
+          },
+          "distortions": {
+            "items": {
+              "$ref": "#/components/schemas/DistortionItem"
+            },
+            "title": "Distortions",
+            "type": "array"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "red_flag": {
+            "$ref": "#/components/schemas/RedFlag"
+          },
+          "triggers": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Triggers",
+            "type": "array"
+          }
+        },
+        "required": [
+          "chief_complaint",
+          "distortions",
+          "triggers",
+          "defenses",
+          "red_flag",
+          "client_summary",
+          "digest",
+          "meta"
+        ],
+        "title": "SessionReportResponse",
+        "type": "object"
+      },
+      "SpecialtyScoresRequest": {
+        "properties": {
+          "candidates": {
+            "items": {
+              "$ref": "#/components/schemas/Candidate"
+            },
+            "title": "Candidates",
+            "type": "array"
+          },
+          "category": {
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Category",
+            "type": "string"
+          },
+          "keywords": {
+            "items": {
+              "maxLength": 50,
+              "type": "string"
+            },
+            "maxItems": 20,
+            "title": "Keywords",
+            "type": "array"
+          }
+        },
+        "required": [
+          "category",
+          "candidates"
+        ],
+        "title": "SpecialtyScoresRequest",
+        "type": "object"
+      },
+      "SpecialtyScoresResponse": {
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "scores": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Scores",
+            "type": "object"
+          }
+        },
+        "required": [
+          "scores",
+          "meta"
+        ],
+        "title": "SpecialtyScoresResponse",
+        "type": "object"
+      },
+      "TagIntakeRequest": {
+        "properties": {
+          "category": {
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Category",
+            "type": "string"
+          },
+          "text": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "category",
+          "text"
+        ],
+        "title": "TagIntakeRequest",
+        "type": "object"
+      },
+      "TimelineItem": {
+        "description": "DB reports.content_enc의 timeline 항목과 같은 형태.\n\nmood_before·mood_after는 백엔드가 기분 체크 값으로 채운다.",
+        "properties": {
+          "key_points": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Key Points",
+            "type": "array"
+          },
+          "session_date": {
+            "format": "date",
+            "title": "Session Date",
+            "type": "string"
+          },
+          "session_no": {
+            "title": "Session No",
+            "type": "integer"
+          },
+          "trainee_label": {
+            "enum": [
+              "수련생 A",
+              "수련생 B"
+            ],
+            "title": "Trainee Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_no",
+          "session_date",
+          "trainee_label",
+          "key_points"
+        ],
+        "title": "TimelineItem",
+        "type": "object"
+      },
+      "Utterance": {
+        "properties": {
+          "role": {
+            "enum": [
+              "client",
+              "provider"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "text": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "text"
+        ],
+        "title": "Utterance",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "MindCare AI Server",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/v1/intake/tags": {
+      "post": {
+        "operationId": "AI-01",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Internal-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Internal-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TagIntakeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntakeTagsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Tag Intake"
+      }
+    },
+    "/v1/mask": {
+      "post": {
+        "operationId": "AI-06",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Internal-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Internal-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MaskRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Mask Pii"
+      }
+    },
+    "/v1/match/specialty-scores": {
+      "post": {
+        "operationId": "AI-02",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Internal-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Internal-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SpecialtyScoresRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpecialtyScoresResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Score Specialties"
+      }
+    },
+    "/v1/ocr/certificate": {
+      "post": {
+        "operationId": "AI-07",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Internal-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Internal-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_AI-07"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OcrResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Read Certificate"
+      }
+    },
+    "/v1/reports/referral": {
+      "post": {
+        "operationId": "AI-05",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Internal-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Internal-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReferralReportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferralReportResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Generate Referral Report"
+      }
+    },
+    "/v1/reports/session": {
+      "post": {
+        "operationId": "AI-04",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Internal-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Internal-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionReportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionReportResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Generate Session Report"
+      }
+    },
+    "/v1/risk/assess": {
+      "post": {
+        "operationId": "AI-03",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Internal-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Internal-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RiskRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiskResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Assess Risk"
+      }
+    }
+  }
+}

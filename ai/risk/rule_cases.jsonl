@@ -1,0 +1,52 @@
+{"text": "요즘 회사 일이 너무 많아서 지쳐요", "level": "none", "hits": []}
+{"text": "시험 답이 다 맞았어요", "level": "none", "hits": []}
+{"text": "배고파 죽겠어요", "level": "none", "hits": []}
+{"text": "요즘은 그냥 죽고 싶어요", "level": "high", "hits": ["suicidal_ideation"]}
+{"text": "죽고싶다는 생각이 자꾸 들어요", "level": "high", "hits": ["suicidal_ideation"]}
+{"text": "그냥 사라지고 싶어요", "level": "high", "hits": ["suicidal_ideation"]}
+{"text": "더는 살고 싶지 않아요", "level": "high", "hits": ["suicidal_ideation"]}
+{"text": "내가 없어지면 다들 편해질 것 같아요", "level": "high", "hits": ["suicidal_ideation"]}
+{"text": "자살을 생각해 본 적이 있어요", "level": "high", "hits": ["suicidal_ideation"]}
+{"text": "힘들긴 한데 죽고 싶을 정도는 아니고 그냥 지쳤어요", "level": "medium", "hits": ["suicidal_ideation"]}
+{"text": "죽고 싶지는 않아요", "level": "medium", "hits": ["suicidal_ideation"]}
+{"text": "친구가 죽고 싶다고 하더라고요", "level": "medium", "hits": ["suicidal_ideation"]}
+{"text": "농담으로 죽고 싶다고 했어요", "level": "medium", "hits": ["suicidal_ideation"]}
+{"text": "죽고 싶어요. 잠도 자지 않고 버텼어요", "level": "high", "hits": ["suicidal_ideation"]}
+{"text": "유서를 써 두었어요", "level": "critical", "hits": ["imminent_suicide"]}
+{"text": "번개탄을 사 놨어요", "level": "critical", "hits": ["imminent_suicide"]}
+{"text": "약을 모아 두고 있어요", "level": "critical", "hits": ["imminent_suicide"]}
+{"text": "옥상에 올라가 봤어요", "level": "critical", "hits": ["imminent_suicide"]}
+{"text": "죽고 싶어서 죽을 방법을 찾아봤어요", "level": "critical", "hits": ["imminent_suicide", "suicidal_ideation"]}
+{"text": "뛰어내리는 건 아니고 그냥 높은 데가 무서워요", "level": "critical", "hits": ["imminent_suicide"]}
+{"text": "어제 손목을 그었어요", "level": "high", "hits": ["self_harm"]}
+{"text": "자해를 한 적이 있어요", "level": "high", "hits": ["self_harm"]}
+{"text": "그 사람을 죽이고 싶어요", "level": "high", "hits": ["harm_to_others"]}
+{"text": "가만 안 둘 거예요", "level": "high", "hits": ["harm_to_others"]}
+{"text": "아버지한테 맞았어요", "level": "medium", "hits": ["abuse_victim"]}
+{"text": "남자친구가 저를 때려요", "level": "medium", "hits": ["abuse_victim"]}
+{"text": "전 애인이 계속 스토킹을 해요", "level": "medium", "hits": ["abuse_victim"]}
+{"text": "가정폭력 때문에 집에 있기 무서워요", "level": "medium", "hits": ["abuse_victim"]}
+{"text": "아버지한테 맞고 나서 죽고 싶었어요", "level": "high", "hits": ["suicidal_ideation", "abuse_victim"]}
+{"text": "뉴스에서 자살 이야기를 봤어요", "level": "medium", "hits": ["suicidal_ideation"]}
+{"text": "수면제를 한 달째 모으고 있어요", "level": "critical", "hits": ["imminent_suicide"]}
+{"text": "제가 없어지면 다들 편해질 것 같아요", "level": "high", "hits": ["suicidal_ideation"]}
+{"text": "저 같은 건 이 세상에 없는 게 모두한테 좋아요", "level": "high", "hits": ["suicidal_ideation"]}
+{"text": "잠들어서 그대로 안 깼으면 좋겠어요", "level": "high", "hits": ["suicidal_ideation"]}
+{"text": "화가 나면 칼로 팔을 그어요", "level": "high", "hits": ["self_harm"]}
+{"text": "스스로를 때리지 않으면 진정이 안 돼요", "level": "high", "hits": ["self_harm"]}
+{"text": "일을 다 끝내고 싶은데 집중이 안 돼요", "level": "none", "hits": []}
+{"text": "이제 다 끝내고 싶어요", "level": "high", "hits": ["suicidal_ideation"]}
+{"text": "약을 챙겨 먹는 걸 자꾸 잊어버려요", "level": "none", "hits": []}
+{"text": "죽고\u3000싶어요", "level": "high", "hits": ["suicidal_ideation"]}
+{"text": "죽고\u00a0싶어요", "level": "high", "hits": ["suicidal_ideation"]}
+{"text": "죽\u200b고 싶어요", "level": "high", "hits": ["suicidal_ideation"]}
+{"text": "죽고 싶을 😭😭😭😭 정도는 아니에요", "level": "medium", "hits": ["suicidal_ideation"]}
+{"text": "죽고      싶어요", "level": "none", "hits": []}
+{"text": "지난주에 자살 시도를 했어요", "level": "high", "hits": ["suicidal_ideation"]}
+{"text": "목숨을 끊고 싶어요", "level": "high", "hits": ["suicidal_ideation"]}
+{"text": "제가 죽어야 끝날 것 같아요", "level": "high", "hits": ["suicidal_ideation"]}
+{"text": "오늘 밤 죽으려고요", "level": "critical", "hits": ["imminent_suicide"]}
+{"text": "지금 죽고 싶어요", "level": "critical", "hits": ["imminent_suicide", "suicidal_ideation"]}
+{"text": "오늘 죽는 줄 알았어요", "level": "none", "hits": []}
+{"text": "나를 해치고 싶어요", "level": "high", "hits": ["self_harm", "harm_to_others"]}
+{"text": "해치고 싶다는 건 아니고요, 그냥 다 내려놓고 쉬고 싶다는 뜻이에요.", "level": "medium", "hits": ["harm_to_others"]}

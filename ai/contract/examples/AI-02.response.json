@@ -1,0 +1,17 @@
+{
+  "scores": {
+    "provider-1": 1.0,
+    "provider-2": 0.1096
+  },
+  "meta": {
+    "provider": "fake",
+    "model": "fake-1",
+    "prompt_version": "score_specialties.v1",
+    "tokens_in": 0,
+    "tokens_out": 0,
+    "latency_ms": 0,
+    "fallback": false,
+    "cache_hit": false,
+    "safety_filtered": false
+  }
+}

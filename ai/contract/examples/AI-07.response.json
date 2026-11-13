@@ -1,0 +1,19 @@
+{
+  "name": "홍길동",
+  "cert_name": "상담심리사 2급",
+  "cert_number": "2026-0001",
+  "issued_on": "2026-03-02",
+  "issuer": "한국상담심리학회",
+  "confidence": 0.9,
+  "meta": {
+    "provider": "fake",
+    "model": "fake-1",
+    "prompt_version": "read_certificate.v1",
+    "tokens_in": 1000,
+    "tokens_out": 50,
+    "latency_ms": 0,
+    "fallback": false,
+    "cache_hit": false,
+    "safety_filtered": false
+  }
+}
