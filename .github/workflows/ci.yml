@@ -127,6 +127,19 @@ jobs:
             docker push "$IMAGE"
           fi
 
+      - name: AI 서버 이미지 빌드 + push
+        # 같은 ECR 레포에 ai-<SHA> 태그로 올린다 (deploy.sh가 이 태그를 받음)
+        env:
+          IMAGE: ${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:ai-${{ github.sha }}
+        run: |
+          if aws ecr describe-images --repository-name "$ECR_REPOSITORY" \
+               --image-ids imageTag="ai-$GITHUB_SHA" > /dev/null 2>&1; then
+            echo "이미 있는 이미지: $IMAGE"
+          else
+            docker build -f ai/Dockerfile -t "$IMAGE" .
+            docker push "$IMAGE"
+          fi
+
       - name: 서버에 배포 (SSM)
         env:
           IMAGE_REPO: ${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}

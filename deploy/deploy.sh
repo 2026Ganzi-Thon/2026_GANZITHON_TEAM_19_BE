@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # 운영 서버(EC2)에서 SSM으로 실행된다 (root). GitHub Actions deploy job 참고.
 #   사용법: deploy.sh <이미지 태그(커밋 SHA)> <ECR 레포 주소>
-# 1) Parameter Store에서 비밀값 → .env, Firebase 키 파일
-# 2) 새 이미지로 compose up → /v1/health 확인
+#   AI 서버 이미지는 같은 ECR 레포의 ai-<SHA> 태그
+# 1) Parameter Store에서 비밀값 → .env(app), ai.env(AI 서버), Firebase 키 파일
+# 2) 새 이미지로 compose up → /v1/health, AI /ready 확인
 # 3) 실패하면 직전 릴리스로 되돌리고 실패로 끝남
 set -euo pipefail
 
@@ -13,6 +14,7 @@ BASE=/opt/mindcare
 REL="$BASE/releases/$TAG"
 CURRENT="$BASE/current"
 HEALTH_URL=http://127.0.0.1:8090/v1/health
+AI_READY_URL=http://127.0.0.1:8091/ready
 
 param() {
   aws ssm get-parameter --region "$REGION" --name "/mindcare/prod/$1" \
@@ -33,25 +35,39 @@ param FIREBASE_SERVICE_ACCOUNT > "$BASE/secrets/firebase.json"
 chown 1001:1001 "$BASE/secrets/firebase.json"
 chmod 400 "$BASE/secrets/firebase.json"
 
+AI_INTERNAL_TOKEN="$(param AI_INTERNAL_TOKEN)"
+
 cat > "$REL/.env" <<EOF
 APP_IMAGE=$IMAGE_REPO:$TAG
+AI_IMAGE=$IMAGE_REPO:ai-$TAG
 DB_PASSWORD=$(param DB_PASSWORD)
 APP_ENCRYPTION_KEY=$(param APP_ENCRYPTION_KEY)
 APP_HMAC_KEY=$(param APP_HMAC_KEY)
 CORS_ORIGINS=$(param CORS_ORIGINS)
+AI_INTERNAL_TOKEN=$AI_INTERNAL_TOKEN
+EOF
+
+# AI 서버 전용 (ai.env.example 참고). LLM 키는 여기에만 들어간다
+cat > "$REL/ai.env" <<EOF
+AI_INTERNAL_TOKENS=$AI_INTERNAL_TOKEN
+LLM_PROVIDER=upstage
+LLM_API_KEY=$(param LLM_API_KEY)
+LLM_MODEL=$(param LLM_MODEL)
+REDIS_URL=redis://redis:6379/1
 EOF
 
 echo "== 이미지 받기"
 aws ecr get-login-password --region "$REGION" \
   | docker login --username AWS --password-stdin "${IMAGE_REPO%%/*}"
-compose "$REL" pull app
+compose "$REL" pull app ai
 
 echo "== 컨테이너 교체"
 compose "$REL" up -d --remove-orphans
 
 echo "== 헬스체크 (최대 150초)"
 for _ in $(seq 1 30); do
-  if curl -fsS "$HEALTH_URL" > /dev/null 2>&1; then
+  if curl -fsS "$HEALTH_URL" > /dev/null 2>&1 \
+     && curl -fsS "$AI_READY_URL" > /dev/null 2>&1; then
     ln -sfn "$REL" "$CURRENT"
     docker image prune -f > /dev/null
     # 릴리스 폴더는 최근 5개만 보관 (ECR 수명 주기와 맞춤)
@@ -62,8 +78,8 @@ for _ in $(seq 1 30); do
   sleep 5
 done
 
-echo "!! 헬스체크 실패. app 로그 마지막 80줄:"
-compose "$REL" logs --tail 80 app || true
+echo "!! 헬스체크 실패. app·ai 로그 마지막 80줄:"
+compose "$REL" logs --tail 80 app ai || true
 
 if [ -L "$CURRENT" ] && [ "$(readlink -f "$CURRENT")" != "$REL" ]; then
   PREV="$(readlink -f "$CURRENT")"

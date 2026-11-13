@@ -39,11 +39,35 @@ services:
       AWS_REGION: ap-northeast-2
       # t3.small(2GB)에서 DB·Redis·Caddy와 같이 돌리므로 힙을 메모리의 40%로 제한
       JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=40
+      # AI 서버 호출용 (X-Internal-Token). ai.env의 AI_INTERNAL_TOKENS와 같은 값
+      AI_BASE_URL: http://ai:8090
+      AI_INTERNAL_TOKEN: ${AI_INTERNAL_TOKEN}
     volumes:
       - /opt/mindcare/secrets/firebase.json:/run/secrets/firebase.json:ro
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # FastAPI AI 서버 (ai/Dockerfile). 백엔드만 내부 네트워크로 부른다 (http://ai:8090)
+  # LLM 키 등은 deploy.sh가 만든 ai.env로만 들어온다 → app 컨테이너는 LLM 키를 모름
+  ai:
+    image: ${AI_IMAGE}
+    restart: unless-stopped
+    # deploy.sh 헬스체크용. 서버 안(127.0.0.1)에서만 열림
+    ports:
+      - "127.0.0.1:8091:8090"
+    env_file:
+      - ./ai.env
+    # t3.small(2GB) 공유. uvicorn 워커 1개라 이 정도면 충분
+    mem_limit: 384m
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8090/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    depends_on:
       redis:
         condition: service_healthy
 
