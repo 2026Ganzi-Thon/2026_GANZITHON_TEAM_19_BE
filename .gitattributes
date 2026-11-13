@@ -1,5 +1,7 @@
 # Windows에서 커밋해도 리눅스(CI·EC2)에서 gradlew가 돌도록 줄바꿈 고정
 gradlew text eol=lf
 *.sh text eol=lf
+# Makefile은 줄 끝에 CR이 붙으면 Windows의 make에서 명령이 깨진다
+Makefile text eol=lf
 *.bat text eol=crlf
 *.jar binary
