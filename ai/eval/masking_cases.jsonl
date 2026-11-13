@@ -1,0 +1,50 @@
+{"text": "민수가 어제 010-2345-6789로 전화했어요", "regex": ["010-2345-6789"], "entities": ["민수"]}
+{"text": "지영 씨는 한빛물산 마케팅팀에 다녀요", "regex": [], "entities": ["지영", "한빛물산"]}
+{"text": "저는 서하대학교 심리학과 3학년이에요", "regex": [], "entities": ["서하대학교"]}
+{"text": "망원동 원룸에 혼자 살아요", "regex": [], "entities": ["망원동"]}
+{"text": "박 팀장님이 jihoon.park@hanbit.example 로 메일을 보내래요", "regex": ["jihoon.park@hanbit.example"], "entities": ["박"]}
+{"text": "수진이랑 합정역 근처 카페에서 싸웠어요", "regex": [], "entities": ["수진", "합정역"]}
+{"text": "제 주민번호는 950505-2345678 이에요", "regex": ["950505-2345678"], "entities": []}
+{"text": "인스타 @yuna_daily 로 연락이 왔어요. 유나였어요", "regex": ["@yuna_daily"], "entities": ["유나"]}
+{"text": "동현 선배가 다솜전자로 이직했대요", "regex": [], "entities": ["동현", "다솜전자"]}
+{"text": "카톡 아이디 haneul_22 로 친구 추가했어요", "regex": ["haneul_22"], "entities": []}
+{"text": "새봄고등학교 때 은지한테 따돌림을 당했어요", "regex": [], "entities": ["새봄고등학교", "은지"]}
+{"text": "어머니가 미래병원 302호에 입원해 계세요", "regex": [], "entities": ["미래병원"]}
+{"text": "https://blog.example.com/jaehyun 에 재현이 제 얘기를 썼어요", "regex": ["https://blog.example.com/jaehyun"], "entities": ["재현"]}
+{"text": "성수동 누리빌딩 5층에서 일해요", "regex": [], "entities": ["성수동", "누리빌딩"]}
+{"text": "카드번호 1234-5678-9012-3456 을 준호한테 알려 줬어요", "regex": ["1234-5678-9012-3456"], "entities": ["준호"]}
+{"text": "이서연 과장님이 저만 회의에서 빼요", "regex": [], "entities": ["이서연"]}
+{"text": "전화는 02-345-6789, 사무실은 가람로 12길이에요", "regex": ["02-345-6789"], "entities": ["가람로 12길"]}
+{"text": "태민이가 푸른학원 강사로 일해요", "regex": [], "entities": ["태민", "푸른학원"]}
+{"text": "수원 영통구에서 강남까지 출퇴근해요", "regex": [], "entities": ["영통구"]}
+{"text": "김하늘이라는 친구가 제 비밀을 퍼뜨렸어요", "regex": [], "entities": ["김하늘"]}
+{"text": "별빛유치원 교사로 일하는데 원장님이 무서워요", "regex": [], "entities": ["별빛유치원"]}
+{"text": "민지 언니가 010 9876 5432 로 문자했어요", "regex": ["010 9876 5432"], "entities": ["민지"]}
+{"text": "한솔은행 서초지점에서 근무해요", "regex": [], "entities": ["한솔은행"]}
+{"text": "정우랑 도현이 둘 다 저를 무시해요", "regex": [], "entities": ["정우", "도현"]}
+{"text": "텔레그램 sora_k 로 협박 메시지가 와요. 소라가 보낸 것 같아요", "regex": ["sora_k"], "entities": ["소라"]}
+{"text": "나래중학교 2학년 3반 담임이에요", "regex": [], "entities": ["나래중학교"]}
+{"text": "연남동 달빛식당에서 아르바이트해요", "regex": [], "entities": ["연남동", "달빛식당"]}
+{"text": "최 대리가 choi.dr@work.example 로 자료를 보내라고 했어요", "regex": ["choi.dr@work.example"], "entities": ["최"]}
+{"text": "예린이 어머니가 학교에 찾아왔어요", "regex": [], "entities": ["예린"]}
+{"text": "온누리교회 청년부에서 만난 사람이에요", "regex": [], "entities": ["온누리교회"]}
+{"text": "성민 오빠가 www.example.org/sm 링크를 보냈어요", "regex": ["www.example.org/sm"], "entities": ["성민"]}
+{"text": "하람시청 민원실에서 일해요", "regex": [], "entities": ["하람시청"]}
+{"text": "부산 해운대 본가에 내려가면 숨이 막혀요", "regex": [], "entities": ["해운대"]}
+{"text": "윤아가 +82 10-5555-1234 로 계속 전화해요", "regex": ["+82 10-5555-1234"], "entities": ["윤아"]}
+{"text": "그린제약 영업3팀 송 차장이 폭언을 해요", "regex": [], "entities": ["그린제약", "송"]}
+{"text": "한울대 대학원 연구실 선배가 괴롭혀요", "regex": [], "entities": ["한울대"]}
+{"text": "지호는 제 남동생이고 건우는 사촌이에요", "regex": [], "entities": ["지호", "건우"]}
+{"text": "이메일 dahye0101@mail.example 로 다혜가 사과했어요", "regex": ["dahye0101@mail.example"], "entities": ["다혜"]}
+{"text": "새솔아파트 103동에 살 때 일이에요", "regex": [], "entities": ["새솔아파트"]}
+{"text": "스타트업 모아랩에서 인턴을 했어요", "regex": [], "entities": ["모아랩"]}
+{"text": "상현이 형이 군대에서 저를 때렸어요", "regex": [], "entities": ["상현"]}
+{"text": "구로디지털단지 근처 고시원에 살아요", "regex": [], "entities": ["구로디지털단지"]}
+{"text": "홍 부장님 번호는 010-1111-2222 예요", "regex": ["010-1111-2222"], "entities": ["홍"]}
+{"text": "가온초등학교 동창 채원이를 다시 만났어요", "regex": [], "entities": ["가온초등학교", "채원"]}
+{"text": "라인 아이디는 mirae_08 이에요", "regex": ["mirae_08"], "entities": []}
+{"text": "두리마트 계산대에서 일하는데 점장이 소리를 질러요", "regex": [], "entities": ["두리마트"]}
+{"text": "혜진 씨와 승우 씨가 사내 연애를 해요", "regex": [], "entities": ["혜진", "승우"]}
+{"text": "대전 유성구 봉명동으로 이사했어요", "regex": [], "entities": ["유성구", "봉명동"]}
+{"text": "새빛간호학원을 다니다 그만뒀어요", "regex": [], "entities": ["새빛간호학원"]}
+{"text": "나연이가 http://cafe.example.net/post/77 글을 올렸어요", "regex": ["http://cafe.example.net/post/77"], "entities": ["나연"]}

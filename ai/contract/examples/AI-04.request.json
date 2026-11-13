@@ -1,0 +1,35 @@
+{
+  "transcript": [
+    {
+      "role": "provider",
+      "text": "오늘은 어떤 이야기를 하고 싶으세요?"
+    },
+    {
+      "role": "client",
+      "text": "면접에서 또 떨어졌어요. 저는 뭘 해도 안 될 것 같아요."
+    },
+    {
+      "role": "provider",
+      "text": "여러 번 이어지니 많이 지치셨겠어요."
+    },
+    {
+      "role": "client",
+      "text": "네. 부모님 얼굴을 볼 면목이 없어요."
+    }
+  ],
+  "intake": {
+    "category": "career",
+    "text": "취업 준비가 1년째인데 면접에서 계속 떨어져요.",
+    "tags": {
+      "emotions": [
+        "불안"
+      ],
+      "distortions": [
+        "파국화"
+      ],
+      "keywords": [
+        "취업"
+      ]
+    }
+  }
+}

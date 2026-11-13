@@ -1,0 +1,58 @@
+[project]
+name = "mindcare-ai"
+version = "0.1.0"
+description = "MindCare AI server (FastAPI) - internal API AI-01 ~ AI-07"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi>=0.162",
+    "uvicorn>=0.54",
+    "pydantic>=2.14",
+    "pydantic-settings>=2.14",
+    "httpx>=0.28",
+    "redis>=8.1",
+    "structlog>=26.1",
+    "pyyaml>=6.0",
+    "python-multipart>=0.0.20",
+    "openai>=3.37",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1",
+    "pytest-asyncio>=1.4",
+    "ruff>=0.17",
+    "mypy>=2.4",
+    "types-pyyaml>=6.0",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = [".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "ASYNC", "S", "SIM", "RUF"]
+ignore = [
+    "RUF001", # 한국어 문자열의 유사 문자 경고
+    "RUF002",
+    "RUF003",
+    "ASYNC109", # LLMClient 인터페이스가 timeout 인자를 받는다 (TRD 16-7)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106"]
+"eval/**" = ["S101"]
+
+[tool.mypy]
+python_version = "3.12"
+plugins = ["pydantic.mypy"]
+ignore_missing_imports = true
+warn_unused_ignores = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]

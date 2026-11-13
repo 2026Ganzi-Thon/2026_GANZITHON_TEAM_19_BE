@@ -1,0 +1,29 @@
+{
+  "text": "[이름1]씨가 [연락처1]로 연락했고, 메일은 [이메일1] 이라고 했어요.",
+  "entities": [
+    {
+      "type": "연락처",
+      "token": "[연락처1]"
+    },
+    {
+      "type": "이메일",
+      "token": "[이메일1]"
+    },
+    {
+      "type": "이름",
+      "token": "[이름1]"
+    }
+  ],
+  "partial": false,
+  "meta": {
+    "provider": "fake",
+    "model": "fake-1",
+    "prompt_version": "mask_pii.v1",
+    "tokens_in": 31,
+    "tokens_out": 50,
+    "latency_ms": 0,
+    "fallback": false,
+    "cache_hit": false,
+    "safety_filtered": false
+  }
+}
