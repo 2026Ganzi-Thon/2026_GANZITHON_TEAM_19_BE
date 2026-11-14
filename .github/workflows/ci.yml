@@ -83,7 +83,10 @@ jobs:
       - name: 공개 OpenAPI 계약 최신 여부
         run: |
           ./gradlew generateOpenApi
-          git diff --exit-code -- openapi.json || {
+          # JSON 공백·키 순서가 아니라 계약 의미를 비교한다. SpringDoc의 환경별 servers 메타데이터는 생성 단계에서 제거한다.
+          git show HEAD:openapi.json | jq -S . > /tmp/openapi-committed.json
+          jq -S . openapi.json > /tmp/openapi-generated.json
+          diff -u /tmp/openapi-committed.json /tmp/openapi-generated.json || {
             echo "::error::openapi.json이 코드와 다릅니다. 'make openapi' 후 커밋하세요."
             exit 1
           }
