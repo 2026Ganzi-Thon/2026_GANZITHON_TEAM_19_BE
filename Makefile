@@ -1,8 +1,11 @@
 # MindCare 백엔드 레포 공용 명령 (TRD 10-1).
-# 지금은 AI 서버(ai/) 대상만 있다. 스프링 쪽 대상(openapi, test, migrate, seed,
-# reset-demo, create-admin)은 담당자가 이 파일에 더한다.
+# 공개·내부 OpenAPI 계약은 코드와 함께 갱신해 같은 PR에 커밋한다 (TRD B-2, 16-11).
 
-.PHONY: ai-openapi ai-eval ai-demo-cache
+.PHONY: openapi ai-openapi ai-eval ai-demo-cache
+
+# 외부 API 계약 openapi.json 갱신. PostgreSQL·Redis가 실행 중이어야 한다.
+openapi:
+	./gradlew generateOpenApi
 
 # 내부 계약 ai/openapi.json 갱신 (TRD 16-11). 갱신한 파일을 같은 PR에 커밋한다.
 ai-openapi:
