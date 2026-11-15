@@ -13,7 +13,7 @@
 - PostgreSQL 17 + Flyway (스키마는 Flyway만 바꾼다. `ddl-auto: validate`)
 - Spring Data JPA, Redis, springdoc-openapi
 - 인증: Firebase ID 토큰 검증 (자체 JWT·비밀번호 없음)
-- 실시간 채팅: STOMP over WebSocket (TRD D-07의 Socket.IO 대신, 프론트는 `@stomp/stompjs`)
+- 실시간 채팅: STOMP over WebSocket (TRD v0.5부터 공식 기준 — 공통 D-07, 백엔드 14장. 프론트는 `@stomp/stompjs`)
 
 ## TRD와 다른 코드 구조
 백엔드 회의에서 정한 구조를 유지한다 (11/5 합의). 프론트에서 보이는 동작은 TRD와 같다.
