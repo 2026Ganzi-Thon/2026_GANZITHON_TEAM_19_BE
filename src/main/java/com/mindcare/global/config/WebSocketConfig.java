@@ -20,7 +20,6 @@ import org.springframework.web.socket.config.annotation.WebSocketTransportRegist
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
-
     private final String[] allowedOrigins;
     private final StompAuthInterceptor stompAuthInterceptor;
 

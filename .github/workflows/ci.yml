@@ -79,6 +79,32 @@ jobs:
         # 컴파일, 테스트(스프링 시작 = Flyway·JPA 검증 포함)
         run: ./gradlew build
 
+      # TRD B-2: DTO/컨트롤러 변경 때 생성되는 외부 계약을 반드시 함께 커밋한다.
+      - name: 공개 OpenAPI 계약 최신 여부
+        run: |
+          ./gradlew generateOpenApi
+          # JSON 공백·키 순서가 아니라 계약 의미를 비교한다. SpringDoc의 환경별 servers 메타데이터는 생성 단계에서 제거한다.
+          git show HEAD:openapi.json | jq -S . > /tmp/openapi-committed.json
+          jq -S . openapi.json > /tmp/openapi-generated.json
+          diff -u /tmp/openapi-committed.json /tmp/openapi-generated.json || {
+            echo "::error::openapi.json이 코드와 다릅니다. 'make openapi' 후 커밋하세요."
+            exit 1
+          }
+
+      # PR에서만 기준 브랜치와 비교한다. 파괴적 변경은 api-breaking 라벨이 있어야만 허용한다.
+      - name: 깨지는 공개 API 계약 변경 검사 (oasdiff)
+        if: ${{ github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'api-breaking') }}
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          git fetch --depth=1 origin "$BASE_REF"
+          if ! git show FETCH_HEAD:openapi.json > /tmp/base-openapi.json 2>/dev/null; then
+            echo "기준 브랜치에 openapi.json이 아직 없어 건너뜁니다."
+            exit 0
+          fi
+          docker run --rm -v "$PWD:/specs:ro" -v /tmp:/tmp:ro tufin/oasdiff breaking \
+            /tmp/base-openapi.json /specs/openapi.json --fail-on ERR
+
   # main에 머지되면 운영 서버(EC2 mindcare-prod)에 배포
   # OIDC로 AWS 역할을 받아서 액세스 키 없이 ECR push → SSM으로 deploy/deploy.sh 실행
   # ⚠️ 11/20 23:59 마감 이후엔 main에 아무것도 머지하지 않는다 (커밋 = 실격)
