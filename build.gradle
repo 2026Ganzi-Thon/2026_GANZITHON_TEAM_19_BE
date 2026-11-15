@@ -49,3 +49,17 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+// TRD B-2: SpringDoc가 실제 애플리케이션에서 만든 공개 API 계약을 openapi.json으로 갱신한다.
+// DB/Flyway가 필요한 컨텍스트 테스트이므로 docker compose 또는 CI의 PostgreSQL·Redis가 실행 중이어야 한다.
+tasks.register('generateOpenApi', Test) {
+    group = 'documentation'
+    description = 'Generates the committed public OpenAPI contract snapshot.'
+    useJUnitPlatform()
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    filter {
+        includeTestsMatching 'com.mindcare.global.config.OpenApiSnapshotTest'
+    }
+    systemProperty 'openapi.output', layout.projectDirectory.file('openapi.json').asFile.absolutePath
+}
