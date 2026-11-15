@@ -4,5 +4,7 @@
 
 15.165.13.247.sslip.io {
 	encode gzip
+	# TRD 실시간 주소는 wss://<서버>/ws 인데 앱은 context-path /v1 아래(/v1/ws)에 떠 있다
+	rewrite /ws /v1/ws
 	reverse_proxy app:8090
 }
