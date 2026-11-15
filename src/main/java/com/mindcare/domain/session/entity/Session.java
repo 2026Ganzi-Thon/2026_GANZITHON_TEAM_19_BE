@@ -52,6 +52,13 @@ public class Session {
         endedBy = "provider";
     }
 
+    /** TRD 14-1: 첫 provider 입장 시 confirmed → in_progress. 이미 진행 중이면 그대로 둔다. */
+    public void start() {
+        if (status == SessionStatus.CONFIRMED) {
+            status = SessionStatus.IN_PROGRESS;
+        }
+    }
+
     public void writeNote(byte[] encryptedNote) { providerNoteEnc = encryptedNote; }
     public void review(short value, byte[] encryptedReview) {
         if (status != SessionStatus.COMPLETED || rating != null) throw new IllegalStateException("Session cannot be reviewed");
