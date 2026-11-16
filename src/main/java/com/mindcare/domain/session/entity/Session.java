@@ -60,8 +60,9 @@ public class Session {
     }
 
     public void writeNote(byte[] encryptedNote) { providerNoteEnc = encryptedNote; }
-    public void review(short value, byte[] encryptedReview) {
-        if (status != SessionStatus.COMPLETED || rating != null) throw new IllegalStateException("Session cannot be reviewed");
+    /** 별점은 선택이라 후기 작성 여부는 review_enc로 판단한다. */
+    public void review(Short value, byte[] encryptedReview) {
+        if (status != SessionStatus.COMPLETED || reviewEnc != null) throw new IllegalStateException("Session cannot be reviewed");
         rating = value; reviewEnc = encryptedReview;
     }
 }
