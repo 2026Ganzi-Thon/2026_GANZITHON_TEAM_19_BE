@@ -71,6 +71,11 @@ public class FirebaseConfig {
                 }
 
                 @Override
+                public void delete(String uid) {
+                    log.debug("account delete skipped (no Firebase key)");
+                }
+
+                @Override
                 public boolean isReal() {
                     return false;
                 }
