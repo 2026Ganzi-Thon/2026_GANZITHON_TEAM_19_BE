@@ -3,6 +3,7 @@ package com.mindcare.domain.session.entity;
 import com.mindcare.domain.user.entity.User;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -12,18 +13,24 @@ import java.time.Instant;
 import jakarta.persistence.Column;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.UuidGenerator;
 
-/** Existing V2 sessions table mapping. Creation remains in the booking flow. */
+/** TRD 11 sessions. 생성은 예약(SES-01)에서만 한다. */
 @Entity
 @Table(name = "sessions")
 @Getter
 @NoArgsConstructor
 public class Session {
-    @Id private UUID id;
+    @Id @GeneratedValue @UuidGenerator(style = UuidGenerator.Style.VERSION_7) private UUID id;
     @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "client_id", nullable = false) private User client;
     @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "provider_id", nullable = false) private User provider;
     private SessionStatus status;
     @Column(nullable = false) private String track;
+    private UUID intakeId;
+    private UUID referralId;
+    private UUID rebookOf;
+    @Column(nullable = false, updatable = false) private UUID slotId;
+    @Column(nullable = false, updatable = false) private int price;
     @Column(nullable = false) private Instant scheduledStart;
     @Column(nullable = false) private Instant scheduledEnd;
     private Instant endedAt;
@@ -33,6 +40,32 @@ public class Session {
     private byte[] providerNoteEnc;
     private Short rating;
     private byte[] reviewEnc;
+
+    /** TRD 15-1: 예약 생성 → pending_payment. 슬롯 홀드는 호출하는 쪽이 같은 트랜잭션에서 먼저 잡는다. */
+    public static Session reserve(User client, User provider, String track, UUID slotId, int price,
+            Instant scheduledStart, Instant scheduledEnd, UUID intakeId, UUID referralId, UUID rebookOf) {
+        Session session = new Session();
+        session.client = client;
+        session.provider = provider;
+        session.track = track;
+        session.slotId = slotId;
+        session.price = price;
+        session.scheduledStart = scheduledStart;
+        session.scheduledEnd = scheduledEnd;
+        session.intakeId = intakeId;
+        session.referralId = referralId;
+        session.rebookOf = rebookOf;
+        session.status = SessionStatus.PENDING_PAYMENT;
+        return session;
+    }
+
+    /** TRD 15-1: 결제 확정 → confirmed. pending_payment가 아니면 거절한다. */
+    public void confirm() {
+        if (status != SessionStatus.PENDING_PAYMENT) {
+            throw new IllegalStateException("Session cannot be confirmed in its current state");
+        }
+        status = SessionStatus.CONFIRMED;
+    }
 
     public void cancel(UUID actorId, String reason) {
         if (status == SessionStatus.COMPLETED || status == SessionStatus.CANCELLED) {
