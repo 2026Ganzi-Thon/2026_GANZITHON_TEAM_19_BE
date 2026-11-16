@@ -112,6 +112,13 @@ public class User {
         this.restrictedUntil = status == UserStatus.RESTRICTED ? until : null;
     }
 
+    /** USR-03 탈퇴. 개인정보 파기는 30일 뒤 배치(purge_withdrawn)가 한다. */
+    public void withdraw(Instant now) {
+        this.status = UserStatus.WITHDRAWN;
+        this.withdrawnAt = now;
+        this.tokensRevokedAt = now;
+    }
+
     public void revokeTokens(Instant now) {
         this.tokensRevokedAt = now;
     }

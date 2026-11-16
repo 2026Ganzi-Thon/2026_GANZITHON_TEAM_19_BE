@@ -9,6 +9,6 @@ import java.util.List;
 public record IntakeCreateRequest(
         @NotNull IntakeCategory category,
         @NotBlank @Size(min = 20, max = 2000) String text,
-        boolean shareRaw,
+        Boolean shareRaw,
         @Size(max = 4) List<@Size(max = 20) String> preferredTimes,
-        boolean notifyWhenAvailable) { }
+        Boolean notifyWhenAvailable) { }

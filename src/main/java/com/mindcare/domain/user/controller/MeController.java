@@ -5,12 +5,14 @@ import com.mindcare.domain.user.dto.NicknameUpdateRequest;
 import com.mindcare.domain.user.entity.User;
 import com.mindcare.domain.user.service.ProviderProfileService;
 import com.mindcare.domain.user.service.UserService;
+import com.mindcare.domain.user.service.WithdrawalService;
 import com.mindcare.global.auth.AuthUser;
 import com.mindcare.global.auth.LoginUser;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,6 +26,7 @@ public class MeController {
 
     private final UserService userService;
     private final ProviderProfileService profileService;
+    private final WithdrawalService withdrawalService;
 
     // TRD: 전체 역할, 모든 상태 허용 (정지·심사 중 계정도 자기 상태를 봐야 안내 화면을 띄움)
     @Operation(operationId = "USR-01", summary = "내 정보 조회")
@@ -43,6 +46,14 @@ public class MeController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void completeEthicsTraining(@LoginUser AuthUser user) {
         userService.completeEthicsTraining(user);
+    }
+
+    // TRD: 전체 역할. 예정·진행 세션이 있으면 409, 없으면 202 (파기는 30일 뒤 배치)
+    @Operation(operationId = "USR-03", summary = "회원 탈퇴")
+    @DeleteMapping("/me")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void withdraw(@LoginUser AuthUser user) {
+        withdrawalService.withdraw(user);
     }
 
     private MeResponse toResponse(User user) {

@@ -35,10 +35,10 @@ public class IntakeService {
         RiskLevel riskLevel = assessLocalRisk(request.text());
         Intake intake = intakeRepository.save(Intake.builder()
                 .client(userService.getById(clientId)).category(request.category())
-                .textEnc(sensitiveTextCodec.encrypt(request.text())).shareRaw(request.shareRaw())
+                .textEnc(sensitiveTextCodec.encrypt(request.text())).shareRaw(Boolean.TRUE.equals(request.shareRaw()))
                 .preferredTimes(request.preferredTimes() == null ? List.of() : request.preferredTimes())
                 .aiTags(Map.of("emotions", List.of(), "distortions", List.of(), "keywords", List.of()))
-                .aiStatus("fallback").riskLevel(riskLevel).notifyWhenAvailable(request.notifyWhenAvailable()).build());
+                .aiStatus("fallback").riskLevel(riskLevel).notifyWhenAvailable(Boolean.TRUE.equals(request.notifyWhenAvailable())).build());
         matchRepository.saveAll(intakeMatchingService.createMatches(intake));
         return IntakeResponse.created(intake, matches(clientId, intake.getId()));
     }
