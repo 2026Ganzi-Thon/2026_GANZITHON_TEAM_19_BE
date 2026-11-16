@@ -35,6 +35,17 @@ class FirebaseAuthAccounts implements AuthAccounts {
     }
 
     @Override
+    public void delete(String uid) {
+        try {
+            firebaseAuth.deleteUser(uid);
+        } catch (FirebaseAuthException e) {
+            if (e.getAuthErrorCode() != AuthErrorCode.USER_NOT_FOUND) {
+                throw new IllegalStateException("Firebase 계정 삭제 실패 (" + e.getAuthErrorCode() + ")", e);
+            }
+        }
+    }
+
+    @Override
     public boolean isReal() {
         return true;
     }
