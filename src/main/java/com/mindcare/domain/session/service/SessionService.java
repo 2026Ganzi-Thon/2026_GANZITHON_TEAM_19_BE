@@ -1,9 +1,16 @@
 package com.mindcare.domain.session.service;
+import com.mindcare.domain.intake.entity.Intake;
+import com.mindcare.domain.intake.repository.IntakeRepository;
 import com.mindcare.domain.session.dto.MoodCheckRequest;
+import com.mindcare.domain.session.dto.SessionCreateRequest;
+import com.mindcare.domain.session.dto.SessionCreateResponse;
 import com.mindcare.domain.session.dto.SessionResponse;
 import com.mindcare.domain.session.dto.SessionReviewRequest;
 import com.mindcare.domain.session.entity.MoodCheck;
 import com.mindcare.domain.session.entity.Session;
+import com.mindcare.domain.session.entity.SessionStatus;
+import com.mindcare.domain.slot.service.SlotHold;
+import com.mindcare.domain.slot.service.SlotService;
 import com.mindcare.domain.session.repository.MoodCheckRepository;
 import com.mindcare.domain.session.repository.SessionRepository;
 import com.mindcare.domain.user.service.UserService;
@@ -20,6 +27,44 @@ import org.springframework.transaction.annotation.Transactional;
 @Service @RequiredArgsConstructor @Transactional(readOnly = true)
 public class SessionService {
     private final SessionRepository sessionRepository; private final MoodCheckRepository moodCheckRepository; private final UserService userService; private final SensitiveTextCodec sensitiveTextCodec; private final RealtimePublisher realtimePublisher;
+    private final SlotService slotService; private final IntakeRepository intakeRepository;
+
+    /**
+     * SES-01 예약 생성 (TRD 13-2, 15-1). 슬롯을 10분 홀드하고 pending_payment 세션을 만든다.
+     * 트랙·가격은 슬롯 소유자 역할로 정한다. 검증이 하나라도 실패하면 홀드까지 같이 롤백된다.
+     */
+    @Transactional public SessionCreateResponse create(UUID clientId, SessionCreateRequest request) {
+        // hold()는 영속성 컨텍스트를 비우므로 엔티티 조회는 그 뒤에 한다
+        SlotHold hold = slotService.hold(request.slotId());
+        UUID intakeId = request.intakeId();
+        if (request.rebookOf() != null) {
+            intakeId = rebookSource(clientId, request.rebookOf(), hold.providerId()).getIntakeId();
+        } else if (intakeId != null) {
+            Intake intake = intakeRepository.findById(intakeId).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND));
+            if (!intake.getClient().getId().equals(clientId)) throw new AppException(ErrorCode.FORBIDDEN_RESOURCE);
+        }
+        Session session = sessionRepository.save(Session.reserve(userService.getById(clientId), userService.getById(hold.providerId()),
+                hold.track(), hold.slotId(), hold.price(), hold.startAt(), hold.endAt(), intakeId, request.referralId(), request.rebookOf()));
+        return SessionCreateResponse.of(session, hold.holdExpiresAt());
+    }
+
+    /** rebook_of: 본인의 completed 세션이고 슬롯 상담사가 같아야 한다. 아니면 422 SESSION_NOT_ELIGIBLE. */
+    private Session rebookSource(UUID clientId, UUID rebookOf, UUID slotProviderId) {
+        Session previous = sessionRepository.findById(rebookOf).orElse(null);
+        if (previous == null || !previous.getClient().getId().equals(clientId)
+                || previous.getStatus() != SessionStatus.COMPLETED || !previous.getProvider().getId().equals(slotProviderId)) {
+            throw new AppException(ErrorCode.SESSION_NOT_ELIGIBLE);
+        }
+        return previous;
+    }
+
+    /** 결제 확정(PAY-03) 이벤트에서 호출. pending_payment → confirmed, 아니면 409 INVALID_STATE (결제도 롤백). */
+    @Transactional public void confirmPaid(UUID sessionId) {
+        Session session = sessionRepository.findById(sessionId).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND));
+        try { session.confirm(); }
+        catch (IllegalStateException e) { throw new AppException(ErrorCode.INVALID_STATE); }
+    }
+
     public List<SessionResponse> list(UUID actorId) { return sessionRepository.findByClientIdOrderByScheduledStartDesc(actorId).stream().map(SessionResponse::from).toList(); }
     public SessionResponse detail(UUID actorId, UUID sessionId) { Session s = getParticipantSession(actorId, sessionId); return SessionResponse.from(s); }
     @Transactional public void recordMood(UUID clientId, UUID sessionId, MoodCheckRequest request) {

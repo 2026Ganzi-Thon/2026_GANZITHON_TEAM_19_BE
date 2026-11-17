@@ -35,6 +35,18 @@ public interface SlotRepository extends JpaRepository<AvailabilitySlot, UUID> {
             """, nativeQuery = true)
     int book(@Param("id") UUID id, @Param("sessionId") UUID sessionId);
 
+    /**
+     * 상담사 탈퇴(USR-03) 때 open 슬롯을 지운다. held·booked는 건드리지 않는다.
+     * 취소된 세션이 가리키는 슬롯(취소 후 다시 open)은 FK 때문에 남긴다. 탈퇴 상담사 슬롯은 SLT-03·hold에서 걸러진다.
+     */
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query(value = """
+            delete from availability_slots a
+             where a.provider_id = :providerId and a.status = 'open'
+               and not exists (select 1 from sessions s where s.slot_id = a.id)
+            """, nativeQuery = true)
+    int deleteOpenByProviderId(@Param("providerId") UUID providerId);
+
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query(value = """
             update availability_slots

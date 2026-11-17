@@ -1,6 +1,9 @@
 package com.mindcare.domain.session.controller;
 import com.mindcare.domain.session.dto.MoodCheckRequest;
 import com.mindcare.domain.session.dto.SessionCancelRequest;
+import com.mindcare.domain.session.dto.SessionCreateRequest;
+import com.mindcare.domain.session.dto.SessionCreateResponse;
+import com.mindcare.global.web.Idempotent;
 import com.mindcare.domain.session.dto.SessionEndRequest;
 import com.mindcare.domain.session.dto.SessionNoteRequest;
 import com.mindcare.domain.session.dto.SessionReviewRequest;
@@ -25,6 +28,13 @@ import java.util.List;
 @RestController @RequiredArgsConstructor
 public class SessionController {
     private final SessionService sessionService;
+
+    @Operation(operationId = "SES-01", summary = "예약 생성 (슬롯 10분 홀드, 결제 대기)")
+    @PostMapping("/sessions") @ResponseStatus(HttpStatus.CREATED) @Idempotent
+    public SessionCreateResponse create(@LoginUser AuthUser user, @Valid @RequestBody SessionCreateRequest request) {
+        user.requireRole(UserRole.CLIENT); return sessionService.create(user.id(), request);
+    }
+
     @Operation(operationId = "SES-05", summary = "상담 전후 마음 온도 기록")
     @PostMapping("/sessions/{sessionId}/mood") @ResponseStatus(HttpStatus.NO_CONTENT)
     public void recordMood(@LoginUser AuthUser user, @PathVariable UUID sessionId, @Valid @RequestBody MoodCheckRequest request) {

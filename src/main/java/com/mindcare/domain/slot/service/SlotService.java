@@ -134,6 +134,10 @@ public class SlotService {
         }
         AvailabilitySlot slot = slotRepository.findById(slotId).orElseThrow();
         User provider = userService.getById(slot.getProviderId());
+        if (provider.getStatus() != UserStatus.ACTIVE) {
+            // 탈퇴·정지 상담사의 남은 슬롯. 예외로 트랜잭션이 롤백되면서 홀드도 풀린다
+            throw new AppException(ErrorCode.NOT_FOUND);
+        }
         String track = trackOf(provider.getRole());
         TrackPricing pricing = priceConfigService.trackPricing(track);
         return new SlotHold(slot.getId(), slot.getProviderId(), track, slot.getStartAt(), slot.getEndAt(),
@@ -166,6 +170,12 @@ public class SlotService {
     @Transactional
     public void release(UUID slotId) {
         slotRepository.release(slotId);
+    }
+
+    /** 상담사 탈퇴(USR-03)에서 호출. 남은 open 슬롯을 지워서 더 이상 예약되지 않게 한다. */
+    @Transactional
+    public void deleteOpenSlotsOf(UUID providerId) {
+        slotRepository.deleteOpenByProviderId(providerId);
     }
 
     private static void validateRange(Instant from, Instant to) {
