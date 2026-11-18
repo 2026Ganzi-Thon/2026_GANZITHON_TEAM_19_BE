@@ -17,5 +17,7 @@ public class Report {
     private byte[] contentEnc; private byte[] clientSummaryEnc; private String riskLevel; private Instant readyAt;
     @CreationTimestamp @Column(nullable = false, updatable = false) private Instant createdAt;
     public static Report generatingForSession(UUID sessionId, UUID clientId, UUID traineeId) { Report r = new Report(); r.scope = "session"; r.sessionId = sessionId; r.clientId = clientId; r.traineeId = traineeId; return r; }
+    public void markReady(byte[] content, byte[] summary, String level) { status = "ready"; contentEnc = content; clientSummaryEnc = summary; riskLevel = level; readyAt = Instant.now(); }
+    public void fail() { status = "failed"; }
     public void regenerate() { status = "generating"; }
 }

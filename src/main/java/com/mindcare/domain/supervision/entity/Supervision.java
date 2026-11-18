@@ -12,6 +12,7 @@ public class Supervision {
  @Column(nullable=false) private SupervisionStatus status=SupervisionStatus.PENDING;
  private Instant dueAt; private Instant submittedAt;
  @CreationTimestamp @Column(nullable=false,updatable=false) private Instant createdAt;
+ public static Supervision forRequest(UUID requestId, UUID sessionId, UUID expertId, UUID traineeId) { Supervision s=new Supervision();s.kind="request";s.requestId=requestId;s.coachingSessionId=sessionId;s.expertId=expertId;s.traineeId=traineeId;return s; }
  public void submit(byte[] content){if(status!=SupervisionStatus.PENDING&&status!=SupervisionStatus.DRAFT)throw new IllegalStateException();contentEnc=content;status=SupervisionStatus.SUBMITTED;submittedAt=Instant.now();}
  public void draft(byte[] content){if(status==SupervisionStatus.SUBMITTED||status==SupervisionStatus.CANCELLED)throw new IllegalStateException();contentEnc=content;status=SupervisionStatus.DRAFT;}
 }

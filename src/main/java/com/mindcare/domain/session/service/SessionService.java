@@ -16,6 +16,7 @@ import com.mindcare.domain.session.repository.MoodCheckRepository;
 import com.mindcare.domain.session.repository.SessionRepository;
 import com.mindcare.domain.user.service.UserService;
 import com.mindcare.domain.report.service.ReportService;
+import com.mindcare.domain.kpi.service.KpiEventService;
 import com.mindcare.global.error.AppException;
 import com.mindcare.global.error.ErrorCode;
 import com.mindcare.global.crypto.SensitiveTextCodec;
@@ -29,7 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 @Service @RequiredArgsConstructor @Transactional(readOnly = true)
 public class SessionService {
-    private final SessionRepository sessionRepository; private final MoodCheckRepository moodCheckRepository; private final UserService userService; private final SensitiveTextCodec sensitiveTextCodec; private final RealtimePublisher realtimePublisher; private final ReportService reportService;
+    private final SessionRepository sessionRepository; private final MoodCheckRepository moodCheckRepository; private final UserService userService; private final SensitiveTextCodec sensitiveTextCodec; private final RealtimePublisher realtimePublisher; private final ReportService reportService; private final KpiEventService kpiEvents;
     private final SlotService slotService; private final IntakeRepository intakeRepository;
 
     /**
@@ -92,6 +93,7 @@ public class SessionService {
         try { session.complete(); }
         catch (IllegalStateException e) { throw new AppException(ErrorCode.INVALID_STATE); }
         reportService.requestForCompletedSession(session);
+        kpiEvents.record("session-completed-" + sessionId, "session_completed", Map.of("track", session.getTrack()));
         // TRD 14-3 session:ended. 실패해도 세션 종료 자체는 유지한다
         realtimePublisher.publish(List.of(session.getClient().getId(), session.getProvider().getId()),
                 "session:ended", Map.of("session_id", sessionId, "ended_by", "provider"));
