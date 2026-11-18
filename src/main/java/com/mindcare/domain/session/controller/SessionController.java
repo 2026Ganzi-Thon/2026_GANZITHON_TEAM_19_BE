@@ -8,6 +8,7 @@ import com.mindcare.domain.session.dto.SessionEndRequest;
 import com.mindcare.domain.session.dto.SessionNoteRequest;
 import com.mindcare.domain.session.dto.SessionReviewRequest;
 import com.mindcare.domain.session.dto.SessionResponse;
+import com.mindcare.domain.session.dto.SessionHistoryItem;
 import com.mindcare.domain.session.service.SessionService;
 import com.mindcare.domain.user.entity.UserRole;
 import com.mindcare.global.auth.AuthUser;
@@ -61,4 +62,10 @@ public class SessionController {
     public void review(@LoginUser AuthUser user, @PathVariable UUID sessionId, @Valid @RequestBody SessionReviewRequest request) { user.requireRole(UserRole.CLIENT); sessionService.review(user.id(), sessionId, request); }
     @Operation(operationId = "SES-08", summary = "상담 메모") @PutMapping("/sessions/{sessionId}/note") @ResponseStatus(HttpStatus.NO_CONTENT)
     public void note(@LoginUser AuthUser user, @PathVariable UUID sessionId, @Valid @RequestBody SessionNoteRequest request) { user.requireRole(UserRole.TRAINEE, UserRole.EXPERT); sessionService.note(user.id(), sessionId, request.note()); }
+    @Operation(operationId = "SES-09", summary = "같은 내담자와의 이전 회기 이력")
+    @GetMapping("/sessions/{sessionId}/history")
+    public List<SessionHistoryItem> history(@LoginUser AuthUser user, @PathVariable UUID sessionId) {
+        user.requireRole(UserRole.TRAINEE, UserRole.EXPERT);
+        return sessionService.history(user.id(), sessionId);
+    }
 }

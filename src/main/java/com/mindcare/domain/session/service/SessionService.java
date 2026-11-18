@@ -6,6 +6,7 @@ import com.mindcare.domain.session.dto.SessionCreateRequest;
 import com.mindcare.domain.session.dto.SessionCreateResponse;
 import com.mindcare.domain.session.dto.SessionResponse;
 import com.mindcare.domain.session.dto.SessionReviewRequest;
+import com.mindcare.domain.session.dto.SessionHistoryItem;
 import com.mindcare.domain.session.entity.MoodCheck;
 import com.mindcare.domain.session.entity.Session;
 import com.mindcare.domain.session.entity.SessionStatus;
@@ -14,19 +15,22 @@ import com.mindcare.domain.slot.service.SlotService;
 import com.mindcare.domain.session.repository.MoodCheckRepository;
 import com.mindcare.domain.session.repository.SessionRepository;
 import com.mindcare.domain.user.service.UserService;
+import com.mindcare.domain.report.service.ReportService;
+import com.mindcare.domain.kpi.service.KpiEventService;
 import com.mindcare.global.error.AppException;
 import com.mindcare.global.error.ErrorCode;
 import com.mindcare.global.crypto.SensitiveTextCodec;
 import com.mindcare.realtime.RealtimePublisher;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 @Service @RequiredArgsConstructor @Transactional(readOnly = true)
 public class SessionService {
-    private final SessionRepository sessionRepository; private final MoodCheckRepository moodCheckRepository; private final UserService userService; private final SensitiveTextCodec sensitiveTextCodec; private final RealtimePublisher realtimePublisher;
+    private final SessionRepository sessionRepository; private final MoodCheckRepository moodCheckRepository; private final UserService userService; private final SensitiveTextCodec sensitiveTextCodec; private final RealtimePublisher realtimePublisher; private final ReportService reportService; private final KpiEventService kpiEvents;
     private final SlotService slotService; private final IntakeRepository intakeRepository;
 
     /**
@@ -88,6 +92,8 @@ public class SessionService {
         if (!session.getProvider().getId().equals(providerId)) throw new AppException(ErrorCode.FORBIDDEN_RESOURCE);
         try { session.complete(); }
         catch (IllegalStateException e) { throw new AppException(ErrorCode.INVALID_STATE); }
+        reportService.requestForCompletedSession(session);
+        kpiEvents.record("session-completed-" + sessionId, "session_completed", Map.of("track", session.getTrack()));
         // TRD 14-3 session:ended. 실패해도 세션 종료 자체는 유지한다
         realtimePublisher.publish(List.of(session.getClient().getId(), session.getProvider().getId()),
                 "session:ended", Map.of("session_id", sessionId, "ended_by", "provider"));
@@ -101,5 +107,21 @@ public class SessionService {
     }
     @Transactional public void review(UUID clientId, UUID sessionId, SessionReviewRequest request) { Session s = sessionRepository.findById(sessionId).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND)); if (!s.getClient().getId().equals(clientId)) throw new AppException(ErrorCode.FORBIDDEN_RESOURCE); try { s.review(request.rating(), sensitiveTextCodec.encrypt(request.text() == null ? "" : request.text())); } catch (IllegalStateException e) { throw new AppException(ErrorCode.INVALID_STATE); } }
     @Transactional public void note(UUID providerId, UUID sessionId, String note) { Session s = sessionRepository.findById(sessionId).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND)); if (!s.getProvider().getId().equals(providerId)) throw new AppException(ErrorCode.FORBIDDEN_RESOURCE); s.writeNote(sensitiveTextCodec.encrypt(note)); }
+    /** SES-09: provider sees only their own completed sessions with this client (latest 10). */
+    public List<SessionHistoryItem> history(UUID providerId, UUID sessionId) {
+        Session current = sessionRepository.findById(sessionId).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND));
+        if (!current.getProvider().getId().equals(providerId)) throw new AppException(ErrorCode.FORBIDDEN_RESOURCE);
+        return sessionRepository.findByProviderIdAndClientIdAndStatusOrderByScheduledStartDesc(providerId,
+                        current.getClient().getId(), SessionStatus.COMPLETED).stream()
+                .filter(session -> !session.getId().equals(sessionId)).limit(10).map(session -> {
+                    Map<com.mindcare.domain.session.entity.MoodPhase, Short> moods = new HashMap<>();
+                    moodCheckRepository.findBySessionId(session.getId())
+                            .forEach(mood -> moods.put(mood.getPhase(), mood.getScore()));
+                    return new SessionHistoryItem(session.getId(), session.getScheduledStart(),
+                            moods.get(com.mindcare.domain.session.entity.MoodPhase.BEFORE),
+                            moods.get(com.mindcare.domain.session.entity.MoodPhase.AFTER),
+                            session.getProviderNoteEnc() == null ? null : sensitiveTextCodec.decrypt(session.getProviderNoteEnc()));
+                }).toList();
+    }
     private Session getParticipantSession(UUID actorId, UUID sessionId) { Session s = sessionRepository.findById(sessionId).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND)); if (!s.getClient().getId().equals(actorId) && !s.getProvider().getId().equals(actorId)) throw new AppException(ErrorCode.FORBIDDEN_RESOURCE); return s; }
 }
