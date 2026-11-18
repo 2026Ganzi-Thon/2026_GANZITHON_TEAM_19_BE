@@ -31,7 +31,7 @@ public class ConsentController {
     @ResponseStatus(HttpStatus.CREATED)
     public ConsentResponse grant(@LoginUser AuthUser user, @Valid @RequestBody ConsentGrantRequest request) {
         user.requireRole(UserRole.CLIENT);
-        return ConsentResponse.from(consentService.grant(user.id(), request.type(), request.version(),
+        return ConsentResponse.from(consentService.grantTransfer(user.id(), request.type(), request.version(),
                 request.targetExpertId(), request.reportId(), request.reportVersion(), request.referralId()));
     }
 
