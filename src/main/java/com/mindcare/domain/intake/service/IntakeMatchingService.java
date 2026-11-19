@@ -32,7 +32,7 @@ class IntakeMatchingService {
     List<Match> createMatches(Intake intake) {
         String requiredTrack = intake.getRiskLevel().ordinal() >= RiskLevel.HIGH.ordinal() ? "expert" : "trainee";
         Instant now = clock.instant();
-        return candidates.findEligible(requiredTrack, now.plus(Duration.ofDays(14)), intake.getClient().getId()).stream()
+        return candidates.findEligible(requiredTrack, now, now.plus(Duration.ofDays(14)), intake.getClient().getId()).stream()
                 .map(candidate -> scored(intake, candidate, now))
                 .sorted(Comparator.comparing(Scored::score).reversed())
                 .limit(3)
