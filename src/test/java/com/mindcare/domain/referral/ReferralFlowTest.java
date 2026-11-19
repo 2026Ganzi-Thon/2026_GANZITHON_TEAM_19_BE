@@ -176,6 +176,65 @@ class ReferralFlowTest {
                 .content("{\"action\": \"decline\"}")).andExpect(status().isForbidden());
     }
 
+    @Test
+    void 연계를_수락하면_수련생_슈퍼비전이_생기고_제출하면_수련생이_읽는다() throws Exception {
+        String referralId = createReferral(second);
+        mockMvc.perform(as(client, put("/referrals/" + referralId + "/expert")).contentType(MediaType.APPLICATION_JSON)
+                .content("{\"expert_id\": \"" + expert.getId() + "\"}")).andExpect(status().isOk());
+        entityManager.flush();
+        mockMvc.perform(as(expert, post("/expert/referrals/" + referralId + "/respond")).contentType(MediaType.APPLICATION_JSON)
+                .content("{\"action\": \"accept\"}")).andExpect(status().isNoContent());
+        entityManager.flush();
+
+        String list = mockMvc.perform(as(expert, get("/expert/supervisions")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].status").value("pending"))
+                .andExpect(jsonPath("$[0].session_count").value(1))
+                .andExpect(jsonPath("$[0].referral_total").value(1))
+                .andReturn().getResponse().getContentAsString();
+        String supervisionId = JsonPath.read(list, "$[0].id");
+
+        mockMvc.perform(as(expert, get("/expert/supervisions/" + supervisionId + "/context")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.trainee_sessions[0].session_id").value(second.toString()))
+                .andExpect(jsonPath("$.position.total").value(1))
+                .andExpect(jsonPath("$.saved").doesNotExist());
+
+        mockMvc.perform(as(expert, put("/expert/supervisions/" + supervisionId)).contentType(MediaType.APPLICATION_JSON)
+                .content("{\"draft\": true, \"well_done\": \"임시\"}")).andExpect(status().isNoContent());
+        mockMvc.perform(as(expert, get("/expert/supervisions/" + supervisionId + "/context")))
+                .andExpect(jsonPath("$.saved.well_done").value("임시"));
+
+        String submit = "{\"draft\": false, \"well_done\": \"공감 반응이 좋았어요\", \"blind_spot\": \"위험 신호를 더 물어봐야 해요\","
+                + " \"alternative_responses\": [{\"session_id\": \"" + second + "\", \"quote\": \"괜찮아요\", \"suggestion\": \"어떤 점이 힘드셨어요?\"}],"
+                + " \"risk_rating\": \"underestimated\", \"risk_comment\": \"자해 질문이 필요했어요\", \"next_action\": \"안전 계획 세우기\","
+                + " \"scores\": {\"rapport\": 4, \"empathy\": 5, \"risk\": 2, \"structure\": 3}}";
+        mockMvc.perform(as(expert, put("/expert/supervisions/" + supervisionId)).contentType(MediaType.APPLICATION_JSON).content(submit))
+                .andExpect(status().isNoContent());
+        mockMvc.perform(as(expert, put("/expert/supervisions/" + supervisionId)).contentType(MediaType.APPLICATION_JSON).content(submit))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error.code").value("ALREADY_SUBMITTED"));
+        entityManager.flush();
+        assertThat(jdbcTemplate.queryForObject("select count(*) from settlements where supervision_id = ?::uuid", Integer.class, supervisionId)).isEqualTo(1);
+
+        mockMvc.perform(as(trainee, get("/trainee/supervisions")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(supervisionId))
+                .andExpect(jsonPath("$[0].read_at").doesNotExist());
+        mockMvc.perform(as(trainee, get("/trainee/supervisions/" + supervisionId)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.well_done").value("공감 반응이 좋았어요"))
+                .andExpect(jsonPath("$.risk_rating").value("underestimated"))
+                .andExpect(jsonPath("$.scores.empathy").value(5))
+                .andExpect(jsonPath("$.alternative_responses[0].suggestion").value("어떤 점이 힘드셨어요?"));
+        mockMvc.perform(as(trainee, get("/trainee/supervisions")))
+                .andExpect(jsonPath("$[0].read_at").exists());
+
+        User otherExpert = saveUser(UserRole.EXPERT);
+        mockMvc.perform(as(otherExpert, get("/expert/supervisions/" + supervisionId + "/context"))).andExpect(status().isForbidden());
+    }
+
     private String createReferral(UUID sessionId) throws Exception {
         String body = mockMvc.perform(as(client, post("/referrals")).contentType(MediaType.APPLICATION_JSON)
                         .content("{\"source_session_id\": \"" + sessionId + "\"}"))
