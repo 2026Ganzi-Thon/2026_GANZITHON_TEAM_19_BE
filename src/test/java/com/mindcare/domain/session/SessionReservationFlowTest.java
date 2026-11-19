@@ -2,6 +2,7 @@ package com.mindcare.domain.session;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -174,6 +175,26 @@ class SessionReservationFlowTest {
         entityManager.clear();
         assertThat(sessionRepository.findById(sessionId).orElseThrow().getStatus()).isEqualTo(SessionStatus.CONFIRMED);
         assertThat(slotRepository.findById(slotId).orElseThrow().getStatus()).isEqualTo(SlotStatus.BOOKED);
+    }
+
+    @Test
+    void 세션_목록은_내담자와_담당_상담사_모두에게_보이고_다른_상담사에게는_안_보인다() throws Exception {
+        String body = reserve(client, "{\"slot_id\": \"" + slotId + "\"}", newKey())
+                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
+        String sessionId = sessionIdOf(body).toString();
+        User otherTrainee = saveUser(UserRole.TRAINEE);
+
+        mockMvc.perform(as(client, get("/sessions")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].session_id").value(sessionId));
+        mockMvc.perform(as(trainee, get("/sessions")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].session_id").value(sessionId));
+        mockMvc.perform(as(otherTrainee, get("/sessions")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
     }
 
     private ResultActions reserve(User user, String json, String key) throws Exception {
