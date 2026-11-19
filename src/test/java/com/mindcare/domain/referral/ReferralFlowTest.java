@@ -44,6 +44,7 @@ class ReferralFlowTest {
     @Autowired JdbcTemplate jdbcTemplate;
     @Autowired EntityManager entityManager;
     @MockitoBean TokenVerifier tokenVerifier;
+    @Autowired com.mindcare.global.crypto.SensitiveTextCodec codec;
 
     MockMvc mockMvc;
     User client;
@@ -122,6 +123,57 @@ class ReferralFlowTest {
 
         User other = saveUser(UserRole.CLIENT);
         mockMvc.perform(as(other, get("/referrals/" + referralId))).andExpect(status().isForbidden());
+    }
+
+    @Test
+    void 전문가는_예약된_연계를_수락하고_동의된_연계_리포트를_객체로_본다() throws Exception {
+        String referralId = createReferral(second);
+        mockMvc.perform(as(client, put("/referrals/" + referralId + "/expert")).contentType(MediaType.APPLICATION_JSON)
+                .content("{\"expert_id\": \"" + expert.getId() + "\"}")).andExpect(status().isOk());
+        UUID reportId = jdbcTemplate.queryForObject("select report_id from referrals where id = ?::uuid", UUID.class, referralId);
+        jdbcTemplate.update("update reports set status = 'ready', ready_at = now(), risk_level = 'low', content_enc = ?, client_summary_enc = ? where id = ?",
+                codec.encrypt("{\"chief_complaint\": \"번아웃\", \"timeline\": [{\"session_no\": 1, \"session_date\": \"2026-11-06\", \"trainee_label\": \"수련생 A\", \"key_points\": [\"지침\"]}]}"),
+                codec.encrypt("{\"chief_complaint\": \"번아웃\"}"), reportId);
+        entityManager.flush();
+        entityManager.clear(); // JDBC로 바꾼 리포트 상태를 JPA가 다시 읽게 한다
+        Instant start = Instant.now().truncatedTo(ChronoUnit.HOURS).plus(Duration.ofDays(1));
+        UUID slot = UUID.randomUUID();
+        jdbcTemplate.update("insert into availability_slots (id, provider_id, start_at, end_at, status) values (?, ?, ?, ?, 'booked')",
+                slot, expert.getId(), Timestamp.from(start), Timestamp.from(start.plus(Duration.ofMinutes(50))));
+        jdbcTemplate.update("""
+                insert into sessions (id, track, client_id, provider_id, slot_id, scheduled_start, scheduled_end, status, price, referral_id)
+                values (?, 'professional', ?, ?, ?, ?, ?, 'confirmed', 50000, ?::uuid)
+                """, UUID.randomUUID(), client.getId(), expert.getId(), slot, Timestamp.from(start), Timestamp.from(start.plus(Duration.ofMinutes(50))), referralId);
+        mockMvc.perform(as(client, post("/consents")).contentType(MediaType.APPLICATION_JSON)
+                .content("{\"type\": \"report_transfer\", \"version\": \"1.0\", \"target_expert_id\": \"" + expert.getId()
+                        + "\", \"referral_id\": \"" + referralId + "\", \"report_id\": \"" + reportId + "\", \"report_version\": 1}"))
+                .andExpect(status().isCreated());
+        entityManager.flush();
+
+        mockMvc.perform(as(expert, get("/expert/referrals")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(referralId))
+                .andExpect(jsonPath("$[0].status").value("booked"))
+                .andExpect(jsonPath("$[0].client_nickname").value(client.getNickname()))
+                .andExpect(jsonPath("$[0].included_session_count").value(1))
+                .andExpect(jsonPath("$[0].has_report_consent").value(true))
+                .andExpect(jsonPath("$[0].report_ready").value(true))
+                .andExpect(jsonPath("$[0].respond_by").exists());
+        mockMvc.perform(as(expert, post("/expert/referrals/" + referralId + "/respond")).contentType(MediaType.APPLICATION_JSON)
+                .content("{\"action\": \"accept\"}")).andExpect(status().isNoContent());
+        entityManager.flush();
+        mockMvc.perform(as(expert, get("/expert/referrals"))).andExpect(jsonPath("$[0].status").value("accepted"));
+
+        mockMvc.perform(as(expert, get("/expert/reports/" + reportId)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.chief_complaint").value("번아웃"))
+                .andExpect(jsonPath("$.content.timeline[0].key_points[0]").value("지침"))
+                .andExpect(jsonPath("$.sources_meta[0].session_no").value(1))
+                .andExpect(jsonPath("$.sources_meta[0].duration_min").value(30));
+
+        User otherExpert = saveUser(UserRole.EXPERT);
+        mockMvc.perform(as(otherExpert, post("/expert/referrals/" + referralId + "/respond")).contentType(MediaType.APPLICATION_JSON)
+                .content("{\"action\": \"decline\"}")).andExpect(status().isForbidden());
     }
 
     private String createReferral(UUID sessionId) throws Exception {
