@@ -16,5 +16,8 @@ public class Referral {
  public void attachReport(UUID id){reportId=id;}
  /** 동의 시점에 포함 회기를 잠근다 (이후 변경 불가). */
  public void lockSessions(){if(includedLockedAt==null)includedLockedAt=Instant.now();}
+ /** 전문가 수락: 전문가를 고른 뒤(예약 전·후)에만. */
+ public void accept(){if(!"expert_selected".equals(status)&&!"booked".equals(status))throw new IllegalStateException();status="accepted";}
+ public void decline(String reason){if(!"expert_selected".equals(status)&&!"booked".equals(status))throw new IllegalStateException();status="declined";declineReason=reason;}
  public void cancel(String reason){if("accepted".equals(status)||"cancelled".equals(status))throw new IllegalStateException();status="cancelled";declineReason=reason;}
 }

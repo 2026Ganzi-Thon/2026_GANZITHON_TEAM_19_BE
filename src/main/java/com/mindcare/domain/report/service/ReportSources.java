@@ -41,4 +41,18 @@ class ReportSources {
                  order by rs.session_no
                 """, ROW, report.getId());
     }
+
+    /** 회기별 상담 시간(분): 실제 시작·종료가 있으면 그 값, 없으면 예약 시간. */
+    List<com.mindcare.domain.report.dto.ExpertReportResponse.SourceMeta> meta(Report report) {
+        String sessionIds = "session".equals(report.getScope())
+                ? "select ?::uuid as session_id, 1 as session_no"
+                : "select session_id, session_no from report_sources where report_id = ?";
+        return jdbc.query("""
+                select src.session_no,
+                       greatest(0, round(extract(epoch from (coalesce(s.ended_at, s.scheduled_end) - coalesce(s.started_at, s.scheduled_start))) / 60))::int as duration_min
+                  from (%s) src join sessions s on s.id = src.session_id
+                 order by src.session_no
+                """.formatted(sessionIds), (rs, i) -> new com.mindcare.domain.report.dto.ExpertReportResponse.SourceMeta(rs.getInt("session_no"), rs.getInt("duration_min")),
+                "session".equals(report.getScope()) ? report.getSessionId() : report.getId());
+    }
 }
