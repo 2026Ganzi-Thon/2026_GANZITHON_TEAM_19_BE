@@ -197,6 +197,25 @@ class SessionReservationFlowTest {
                 .andExpect(jsonPath("$.length()").value(0));
     }
 
+    @Test
+    void 세션_목록과_상세에_세션_리포트_id가_들어가고_리포트가_없으면_null() throws Exception {
+        UUID done = insertSession(client, trainee, saveSlot(trainee, START.minus(Duration.ofDays(7))), "completed", null);
+        UUID reportId = UUID.randomUUID();
+        jdbcTemplate.update("insert into reports (id, scope, session_id, client_id, trainee_id, status) values (?, 'session', ?, ?, ?, 'ready')",
+                reportId, done, client.getId(), trainee.getId());
+        reserve(client, "{\"slot_id\": \"" + slotId + "\"}", newKey()).andExpect(status().isCreated());
+
+        mockMvc.perform(as(client, get("/sessions")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[?(@.session_id == '" + done + "')].report.id").value(reportId.toString()))
+                .andExpect(jsonPath("$[?(@.session_id == '" + done + "')].report.status").value("ready"))
+                .andExpect(jsonPath("$[?(@.session_id != '" + done + "')].report").value(org.hamcrest.Matchers.contains(org.hamcrest.Matchers.nullValue())));
+        mockMvc.perform(as(client, get("/sessions/" + done)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.report.id").value(reportId.toString()));
+    }
+
     private ResultActions reserve(User user, String json, String key) throws Exception {
         return mockMvc.perform(as(user, post("/sessions"))
                 .header("Idempotency-Key", key)

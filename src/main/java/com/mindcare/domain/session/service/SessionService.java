@@ -15,6 +15,8 @@ import com.mindcare.domain.slot.service.SlotService;
 import com.mindcare.domain.session.repository.MoodCheckRepository;
 import com.mindcare.domain.session.repository.SessionRepository;
 import com.mindcare.domain.user.service.UserService;
+import com.mindcare.domain.report.entity.Report;
+import com.mindcare.domain.report.repository.ReportRepository;
 import com.mindcare.domain.report.service.ReportService;
 import com.mindcare.domain.kpi.service.KpiEventService;
 import com.mindcare.global.error.AppException;
@@ -31,7 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service @RequiredArgsConstructor @Transactional(readOnly = true)
 public class SessionService {
     private final SessionRepository sessionRepository; private final MoodCheckRepository moodCheckRepository; private final UserService userService; private final SensitiveTextCodec sensitiveTextCodec; private final RealtimePublisher realtimePublisher; private final ReportService reportService; private final KpiEventService kpiEvents;
-    private final SlotService slotService; private final IntakeRepository intakeRepository;
+    private final SlotService slotService; private final IntakeRepository intakeRepository; private final ReportRepository reportRepository;
 
     /**
      * SES-01 예약 생성 (TRD 13-2, 15-1). 슬롯을 10분 홀드하고 pending_payment 세션을 만든다.
@@ -69,8 +71,16 @@ public class SessionService {
         catch (IllegalStateException e) { throw new AppException(ErrorCode.INVALID_STATE); }
     }
 
-    public List<SessionResponse> list(UUID actorId) { return sessionRepository.findByClientIdOrProviderIdOrderByScheduledStartDesc(actorId, actorId).stream().map(SessionResponse::from).toList(); }
-    public SessionResponse detail(UUID actorId, UUID sessionId) { Session s = getParticipantSession(actorId, sessionId); return SessionResponse.from(s); }
+    public List<SessionResponse> list(UUID actorId) {
+        List<Session> sessions = sessionRepository.findByClientIdOrProviderIdOrderByScheduledStartDesc(actorId, actorId);
+        // 세션마다 따로 조회하지 않고 리포트를 한 번에 모은다
+        Map<UUID, Report> reports = new HashMap<>();
+        if (!sessions.isEmpty()) {
+            for (Report r : reportRepository.findBySessionIdIn(sessions.stream().map(Session::getId).toList())) reports.put(r.getSessionId(), r);
+        }
+        return sessions.stream().map(s -> SessionResponse.from(s, reports.get(s.getId()))).toList();
+    }
+    public SessionResponse detail(UUID actorId, UUID sessionId) { Session s = getParticipantSession(actorId, sessionId); return SessionResponse.from(s, reportRepository.findBySessionId(s.getId()).orElse(null)); }
     @Transactional public void recordMood(UUID clientId, UUID sessionId, MoodCheckRequest request) {
         Session session = sessionRepository.findById(sessionId).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND));
         if (!session.getClient().getId().equals(clientId)) throw new AppException(ErrorCode.FORBIDDEN_RESOURCE);
