@@ -17,11 +17,12 @@ public interface MatchingCandidateRepository extends Repository<Match, UUID> {
               from provider_profiles pp
               join users u on u.id = pp.user_id
               join availability_slots s on s.provider_id = pp.user_id
-             where pp.track = :track and u.status = 'active' and s.status = 'open' and s.start_at < :until
+             where pp.track = :track and u.status = 'active' and s.status = 'open'
+               and s.start_at > :now and s.start_at < :until
                and not exists (select 1 from complaints c where c.reporter_id = :clientId and c.target_id = pp.user_id)
              group by pp.user_id, pp.display_name, pp.track, pp.specialties, pp.rating_avg, pp.rating_count
             """, nativeQuery = true)
-    List<Candidate> findEligible(@Param("track") String track, @Param("until") Instant until,
+    List<Candidate> findEligible(@Param("track") String track, @Param("now") Instant now, @Param("until") Instant until,
             @Param("clientId") UUID clientId);
 
     interface Candidate {
