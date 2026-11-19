@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ExpertReferralService {
     private final ReferralRepository referrals;
     private final JdbcTemplate jdbc;
+    private final com.mindcare.domain.supervision.service.SupervisionWorkflowService supervisions;
 
     public List<ExpertReferralItem> list(UUID expertId) {
         return jdbc.query("""
@@ -57,7 +58,7 @@ public class ExpertReferralService {
         Referral r = referrals.findById(referralId).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND));
         if (!expertId.equals(r.getExpertId())) throw new AppException(ErrorCode.FORBIDDEN_RESOURCE);
         try {
-            if ("accept".equals(action)) r.accept();
+            if ("accept".equals(action)) { r.accept(); referrals.flush(); supervisions.createForReferral(referralId); }
             else r.decline(reason);
         } catch (IllegalStateException e) {
             throw new AppException(ErrorCode.INVALID_STATE);
