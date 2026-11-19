@@ -59,7 +59,7 @@ class MatchEarliestSlotTest {
         jdbcTemplate.update("""
                 insert into provider_profiles (user_id, track, display_name, real_name_enc, specialties)
                 values (?, 'trainee', ?, ?, array['burnout'])
-                """, trainee.getId(), "slot-" + trainee.getId().toString().substring(0, 8), new byte[] {1});
+                """, trainee.getId(), "slot-" + trainee.getId().toString().substring(24), new byte[] {1});
         Instant hour = Instant.now().truncatedTo(ChronoUnit.HOURS);
         insertSlot(hour.minus(Duration.ofDays(5)));
         future = hour.plus(Duration.ofDays(2));
