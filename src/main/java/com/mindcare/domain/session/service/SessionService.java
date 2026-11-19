@@ -69,7 +69,7 @@ public class SessionService {
         catch (IllegalStateException e) { throw new AppException(ErrorCode.INVALID_STATE); }
     }
 
-    public List<SessionResponse> list(UUID actorId) { return sessionRepository.findByClientIdOrderByScheduledStartDesc(actorId).stream().map(SessionResponse::from).toList(); }
+    public List<SessionResponse> list(UUID actorId) { return sessionRepository.findByClientIdOrProviderIdOrderByScheduledStartDesc(actorId, actorId).stream().map(SessionResponse::from).toList(); }
     public SessionResponse detail(UUID actorId, UUID sessionId) { Session s = getParticipantSession(actorId, sessionId); return SessionResponse.from(s); }
     @Transactional public void recordMood(UUID clientId, UUID sessionId, MoodCheckRequest request) {
         Session session = sessionRepository.findById(sessionId).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND));
