@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,16 +30,19 @@ public class IntakeService {
     private final IntakeMatchingService intakeMatchingService;
     private final UserService userService;
     private final SensitiveTextCodec sensitiveTextCodec;
+    private final IntakeTagger intakeTagger;
 
     @Transactional
     public IntakeResponse create(UUID clientId, IntakeCreateRequest request) {
         RiskLevel riskLevel = assessLocalRisk(request.text());
+        // AI-01: 태그를 먼저 받아야 매칭이 키워드까지 반영한다. 실패하면 빈 태그 + fallback으로 접수는 계속한다.
+        Optional<Map<String, List<String>>> aiTags = intakeTagger.tag(request.category().getValue(), request.text());
         Intake intake = intakeRepository.save(Intake.builder()
                 .client(userService.getById(clientId)).category(request.category())
                 .textEnc(sensitiveTextCodec.encrypt(request.text())).shareRaw(Boolean.TRUE.equals(request.shareRaw()))
                 .preferredTimes(request.preferredTimes() == null ? List.of() : request.preferredTimes())
-                .aiTags(Map.of("emotions", List.of(), "distortions", List.of(), "keywords", List.of()))
-                .aiStatus("fallback").riskLevel(riskLevel).notifyWhenAvailable(Boolean.TRUE.equals(request.notifyWhenAvailable())).build());
+                .aiTags(aiTags.orElse(Map.of("emotions", List.of(), "distortions", List.of(), "keywords", List.of())))
+                .aiStatus(aiTags.isPresent() ? "ok" : "fallback").riskLevel(riskLevel).notifyWhenAvailable(Boolean.TRUE.equals(request.notifyWhenAvailable())).build());
         matchRepository.saveAll(intakeMatchingService.createMatches(intake));
         return IntakeResponse.created(intake, matches(clientId, intake.getId()));
     }
